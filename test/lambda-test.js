@@ -17,7 +17,7 @@ var profilesPut = require('../functions/profiles/put.js');
 var profilesDelete = require('../functions/profiles/delete.js');
 var profilesQuery = require('../functions/profiles/query.js');
 
-var dynamodbLocalPath = __dirname + '/../../dynamodb_local';
+var dynamodbLocalPath = __dirname + '/../dynamodb_local';
 var port = 4569;
 
 
