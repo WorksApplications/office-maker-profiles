@@ -3,6 +3,7 @@ var options = require('./db-options.js');
 var documentClient = new AWS.DynamoDB.DocumentClient(options);
 var dynamoUtil = require('./dynamo-util.js');
 var searchHelper = require('./search-helper.js');
+var log = require('./log.js');
 
 function getProfile(userId) {
   return dynamoUtil.get(documentClient, {
@@ -104,13 +105,8 @@ function deleteNormalizedFields(profile) {
   return profile;
 }
 
-function findProfileByQuery(q, limit, exclusiveStartKey) {
-  if (q[0] === '"' && q[q.length - 1] === '"') {
-    q = q.substring(1, q.length - 1);
-  }
-  var normalizedQ = searchHelper.normalize(q);
-  // each search should return one profile
-  var searches = [
+function makeSearchs(q, normalizedQ) {
+  return [
     queryHelpName1(normalizedQ),
     queryHelpName2(normalizedQ),
     queryHelpRuby1(normalizedQ),
@@ -121,6 +117,24 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
     queryHelpMail(q),
     queryHelpMailBeforeAt(q)
   ] : []);
+}
+
+function findProfileByQuery(q, limit, exclusiveStartKey) {
+  var searches;
+  if (q[0] === '"' && q[q.length - 1] === '"') {
+    q = q.substring(1, q.length - 1);
+    var normalizedQ = searchHelper.normalize(q);
+    searches = makeSearchs(q, normalizedQ);
+  } else {
+    var qs = searchHelper.normalizeSpace(q).split(' ');
+    searches = qs.map(q => {
+      var normalizedQ = searchHelper.normalize(q);
+      return makeSearchs(q, normalizedQ);
+    }).reduce((memo, searches) => {
+      return memo.concat(searches);
+    }, []);
+  }
+
   var start = Date.now();
   return Promise.all(searches).then(profilesList => {
     var dict = {};
@@ -129,7 +143,7 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
         dict[profile.userId] = profile;
       });
     });
-    console.log('got ' + Object.keys(dict).length, 'took ' + (Date.now() - start) + 'ms');
+    log('got ' + Object.keys(dict).length, 'took ' + (Date.now() - start) + 'ms');
     return Promise.resolve({
       profiles: Object.keys(dict).map(key => dict[key])
     });

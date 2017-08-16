@@ -32,21 +32,6 @@ var profiles = fs.readFileSync(__dirname + '/mock.csv', 'utf8').replace(/\r/g, '
   }
 }).filter(profile => !!profile);
 
-profiles.push({
-  userId: 'arai_s@worksap.co.jp',
-  employeeId: 'XXXX',
-  picture: null,
-  name: '新井 テスト',
-  ruby: 'あらい てすと',
-  organization: 'Example Co., Ltd.',
-  post: 'Example 0',
-  rank: 'Manager',
-  cellPhone: '080-XXX-XXXX',
-  extensionPhone: 'XXXXX',
-  mail: 'arai_s@worksap.co.jp',
-  workplace: null
-});
-
 console.log('generating mock data...');
 // profiles.reduce((promise, profile) => {
 //   return promise.then(_ => putProfile(profile));

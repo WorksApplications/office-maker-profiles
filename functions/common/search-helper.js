@@ -95,5 +95,5 @@ function getKeys(object) {
 
 module.exports = {
   normalize: normalize,
-  getKeys: getKeys
+  normalizeSpace: normalizeSpace
 };

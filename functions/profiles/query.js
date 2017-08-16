@@ -1,5 +1,6 @@
 var db = require('../common/db.js');
 var lambdaUtil = require('../common/lambda-util.js');
+var log = require('../common/log.js');
 
 exports.handler = (event, context, callback) => {
   var q = event.queryStringParameters.q || undefined;
@@ -8,7 +9,7 @@ exports.handler = (event, context, callback) => {
   var order = event.queryStringParameters.order;
   var limit = event.queryStringParameters.limit;
   var exclusiveStartKey = event.queryStringParameters.exclusiveStartKey;
-  console.log('Query:', q);
+  log('Query:', q);
 
   if (userId) {
     var userIds = userId.split(',');
