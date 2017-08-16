@@ -21,8 +21,18 @@ exports.handler = (event, context, callback) => {
       });
     });
   } else if (q) {
+    var now = new Date();
+    now.setTime(now.getTime() + 10 * 1000);
+    var expires = now.toGMTString();
     db.findProfileByQuery(q, limit, exclusiveStartKey).then(result => {
-      lambdaUtil.send(callback, 200, result);
+      callback(null, {
+        statusCode: 200,
+        headers: {
+          "Expires": expires,
+          "Content-Type": "application/json"
+        },
+        body: result ? JSON.stringify(result) : ''
+      });
     }).catch(e => {
       lambdaUtil.send(callback, 500, {
         message: e.message
