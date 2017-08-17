@@ -13,7 +13,8 @@ var stageName = 'dev';
 var serviceRoot = `https://${restApiId}.execute-api.${region}.amazonaws.com/${stageName}`;
 
 
-describe('Profile Service', () => {
+describe('Profile Service', function() {
+  this.timeout(5000);
   var dbProcess = null;
   before(() => {
     var url = serviceRoot + '/profiles/test@example.com';
