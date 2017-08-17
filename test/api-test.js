@@ -107,7 +107,7 @@ describe('Profile Service', () => {
       };
       return send('Bearer hogehoge', 'PUT', url, data).then(assertStatus(401));
     });
-    it('returns 403 if unauthorized', () => {
+    it('returns 403 if user is not admin', () => {
       var url = serviceRoot + '/profiles/not_exist@example.com';
       var data = {
         "userId": "dummy@example.com",

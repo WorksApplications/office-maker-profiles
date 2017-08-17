@@ -138,14 +138,18 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
   var start = Date.now();
   return Promise.all(searches).then(profilesList => {
     var dict = {};
+    var count = {};
     profilesList.forEach(profiles => {
       profiles.forEach(profile => {
         dict[profile.userId] = profile;
+        count[profile.userId] = (count[profile.userId] || 0) + 1;
       });
     });
     log('got ' + Object.keys(dict).length, 'took ' + (Date.now() - start) + 'ms');
     return Promise.resolve({
-      profiles: Object.keys(dict).map(key => dict[key])
+      profiles: Object.keys(dict).map(key => dict[key]).sort((a, b) => {
+        return count[a.userId] - count[b.userId];
+      })
     });
   });
 }
