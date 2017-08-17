@@ -5,7 +5,7 @@ var sourceIp = require('./sourceIp.js');
 
 function getSelf(token) {
   if (!token) {
-    return Promise.reject();
+    return Promise.resolve(null);
   }
   return new Promise((resolve, reject) => {
     jwt.verify(token, publicKey, {
@@ -18,11 +18,7 @@ function getSelf(token) {
       }
     });
   }).catch(e => {
-    if (e.name === 'JsonWebTokenError') {
-      return Promise.reject('Unauthorized');
-    } else {
-      return Promise.reject(e.toString());
-    }
+    return Promise.resolve(null);
   });
 }
 
@@ -30,9 +26,8 @@ exports.handler = (event, context, callback) => {
   console.log(event, context);
   event.headers = event.headers || {};
   var token = (event.authorizationToken || '').split('Bearer ')[1];
-  (token ? getSelf(token) : Promise.reject()).then(user => {
-    console.log(user);
-    if (user.role === 'ADMIN') {
+  getSelf(token).then(user => {
+    if (user && user.role === 'ADMIN') {
       callback(null, {
         principalId: user.userId,
         policyDocument: {
@@ -45,12 +40,7 @@ exports.handler = (event, context, callback) => {
         },
         context: user
       });
-    } else if (user.role === 'GENERAL') {
-      console.log(event.methodArn, event.methodArn
-        .replace('/POST/', '/GET/')
-        .replace('/PUT/', '/GET/')
-        .replace('/PATCH/', '/GET/')
-        .replace('/DELETE/', '/GET/'))
+    } else if (user && user.role === 'GENERAL') {
       callback(null, {
         principalId: user.userId,
         policyDocument: {
@@ -68,7 +58,27 @@ exports.handler = (event, context, callback) => {
         context: user
       });
     } else {
-      return Promise.reject();
+      callback(null, {
+        principalId: 'guest',
+        policyDocument: {
+          Version: '2012-10-17',
+          Statement: [{
+            Action: 'execute-api:Invoke',
+            Effect: 'Allow',
+            Condition: {
+              IpAddress: {
+                "aws:SourceIp": sourceIp
+              }
+            },
+            Resource: event.methodArn
+              .replace('/POST/', '/GET/')
+              .replace('/PUT/', '/GET/')
+              .replace('/PATCH/', '/GET/')
+              .replace('/DELETE/', '/GET/')
+          }]
+        },
+        context: user
+      });
     }
   }).catch(_ => {
     callback('Unauthorized');
