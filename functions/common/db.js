@@ -148,7 +148,7 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
     log('got ' + Object.keys(dict).length, 'took ' + (Date.now() - start) + 'ms');
     return Promise.resolve({
       profiles: Object.keys(dict).map(key => dict[key]).sort((a, b) => {
-        return count[a.userId] - count[b.userId];
+        return count[b.userId] - count[a.userId];
       })
     });
   });
