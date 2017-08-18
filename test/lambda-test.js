@@ -46,7 +46,7 @@ describe('Profile Lambda', () => {
   });
   beforeEach(() => {
     return db.putProfile({
-      userId: 'yamada@example.com',
+      userId: 'yamada_t@example.com',
       picture: null,
       name: '山田 太郎',
       ruby: 'やまだ たろう',
@@ -56,7 +56,7 @@ describe('Profile Lambda', () => {
       rank: 'Manager',
       cellPhone: '080-XXX-4567',
       extensionPhone: 'XXXXX',
-      mail: 'yamada@example.com',
+      mail: 'yamada_t@example.com',
       workplace: null
     }).then(_ => db.putProfile({
       userId: 'yamada_s@example.com',
@@ -84,7 +84,7 @@ describe('Profile Lambda', () => {
     it('should search profiles by userId', () => {
       return handlerToPromise(profilesQuery.handler)({
         "queryStringParameters": {
-          "userId": "yamada@example.com"
+          "userId": "yamada_t@example.com"
         }
       }, {}).then(assertProfileLength(1)).then(res => {
         var profile = JSON.parse(res.body).profiles[0];
@@ -102,7 +102,7 @@ describe('Profile Lambda', () => {
     it('should search multiple profiles by userId', () => {
       return handlerToPromise(profilesQuery.handler)({
         "queryStringParameters": {
-          "userId": "yamada@example.com,yamada_s@example.com"
+          "userId": "yamada_t@example.com,yamada_s@example.com"
         }
       }, {}).then(assertProfileLength(2));
     });
@@ -151,6 +151,13 @@ describe('Profile Lambda', () => {
     it('should search profiles by q (match to mail before @)', () => {
       return handlerToPromise(profilesQuery.handler)({
         "queryStringParameters": {
+          "q": "yamada_t"
+        }
+      }, {}).then(assertProfileLength(1));
+    });
+    it('should search profiles by q (match to mail before _)', () => {
+      return handlerToPromise(profilesQuery.handler)({
+        "queryStringParameters": {
           "q": "yamada"
         }
       }, {}).then(assertProfileLength(1));
@@ -158,7 +165,7 @@ describe('Profile Lambda', () => {
     it('should NOT search profiles by q (match to mail, upper case)', () => {
       return handlerToPromise(profilesQuery.handler)({
         "queryStringParameters": {
-          "q": "YAMADA"
+          "q": "YAMADA_T"
         }
       }, {}).then(assertProfileLength(0));
     });
@@ -190,36 +197,6 @@ describe('Profile Lambda', () => {
         }
       }, {}).then(assertProfileLength(1));
     });
-    // it('should work with limit and exclusiveStartKey', () => {
-    //   return handlerToPromise(profilesQuery.handler)({
-    //     "queryStringParameters": {
-    //       "q": "やまだ",
-    //       "limit": 1
-    //     }
-    //   }, {}).then(assertProfileLength(1)).then(res => {
-    //     // console.log(JSON.parse(res.body).lastEvaluatedKey);
-    //     return handlerToPromise(profilesQuery.handler)({
-    //       "queryStringParameters": {
-    //         "q": "やまだ",
-    //         "limit": 1,
-    //         "exclusiveStartKey": JSON.parse(res.body).lastEvaluatedKey
-    //       }
-    //     }, {}).then(assertProfileLength(1)).then(res => {
-    //       return handlerToPromise(profilesQuery.handler)({
-    //         "queryStringParameters": {
-    //           "q": "やまだ",
-    //           "limit": 1,
-    //           "exclusiveStartKey": JSON.parse(res.body).lastEvaluatedKey
-    //         }
-    //       }, {}).then(assertProfileLength(0)).then(res => {
-    //         if (JSON.parse(res.body).lastEvaluatedKey) {
-    //           return Promise.reject('lastEvaluatedKey found: ' + JSON.parse(res.body).lastEvaluatedKey);
-    //         }
-    //         return Promise.resolve();
-    //       });
-    //     });
-    //   });
-    // });
     it('should support multiple queries at once', () => {
       return handlerToPromise(profilesQuery.handler)({
         "queryStringParameters": {
@@ -304,7 +281,7 @@ describe('Profile Lambda', () => {
     it('returns 200 if profile exists', () => {
       return handlerToPromise(profilesGet.handler)({
         "pathParameters": {
-          "userId": "yamada@example.com"
+          "userId": "yamada_t@example.com"
         }
       }, {}).then(assertStatus(200)).then(res => {
         var profile = JSON.parse(res.body);
@@ -394,7 +371,6 @@ function assertProfileLengthInDB(expect) {
   };
 }
 
-
 function assertStatus(expect) {
   return result => {
     if (result.statusCode !== expect) {
@@ -403,16 +379,6 @@ function assertStatus(expect) {
     return Promise.resolve(result);
   };
 }
-
-// function assertRoughStatus(expect) {
-//   var actual = result.statusCode - result.statusCode % 100;
-//   return result => {
-//     if (actual !== expect) {
-//       throw `Expected statusCode ${expect} but got ${result.statusCode}: ${JSON.stringify(result)}`;
-//     }
-//     return Promise.resolve();
-//   };
-// }
 
 function reducePromises(promises) {
   return promises.reduce((prev, toPromise) => {

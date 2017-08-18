@@ -115,7 +115,8 @@ function makeSearchs(q, normalizedQ) {
     queryHelpEmployeeId(q),
   ].concat(normalizedQ === q ? [ // lower case string
     queryHelpMail(q),
-    queryHelpMailBeforeAt(q)
+    queryHelpMailBeforeAt(q),
+    queryHelpMailBeforeUnderscore(q)
   ] : []);
 }
 
@@ -239,6 +240,19 @@ function queryHelpMailBeforeAt(q) {
     KeyConditionExpression: 'normalizedMailBeforeAt = :normalizedMailBeforeAt',
     ExpressionAttributeValues: {
       ":normalizedMailBeforeAt": q
+    }
+  }).then(data => {
+    return Promise.resolve(data.Items.map(deleteNormalizedFields));
+  });
+}
+
+function queryHelpMailBeforeUnderscore(q) {
+  return dynamoUtil.query(documentClient, {
+    TableName: 'profilesSearchHelp',
+    IndexName: "profilesMailBeforeUnderscoreIndex",
+    KeyConditionExpression: 'normalizedMailBeforeUnderscore = :normalizedMailBeforeUnderscore',
+    ExpressionAttributeValues: {
+      ":normalizedMailBeforeUnderscore": q
     }
   }).then(data => {
     return Promise.resolve(data.Items.map(deleteNormalizedFields));
