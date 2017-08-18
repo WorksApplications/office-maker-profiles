@@ -111,8 +111,8 @@ Resources:
           AttributeType: S
         - AttributeName: normalizedMailBeforeAt
           AttributeType: S
-        - AttributeName: normalizedMailBeforeUnderscore
-          AttributeType: S
+        # - AttributeName: normalizedMailBeforeUnderscore
+        #   AttributeType: S
       KeySchema:
         -
           AttributeName: userId
@@ -163,20 +163,20 @@ Resources:
           ProvisionedThroughput:
             ReadCapacityUnits: 1
             WriteCapacityUnits: 1
-        -
-          IndexName: profilesMailBeforeUnderscoreIndex
-          KeySchema:
-            -
-              AttributeName: normalizedMailBeforeUnderscore
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
+        # -
+        #   IndexName: profilesMailBeforeUnderscoreIndex
+        #   KeySchema:
+        #     -
+        #       AttributeName: normalizedMailBeforeUnderscore
+        #       KeyType: HASH
+        #     -
+        #       AttributeName: userId
+        #       KeyType: RANGE
+        #   Projection:
+        #     ProjectionType: ALL
+        #   ProvisionedThroughput:
+        #     ReadCapacityUnits: 1
+        #     WriteCapacityUnits: 1
 
   Authorizer:
     Type: AWS::Serverless::Function
