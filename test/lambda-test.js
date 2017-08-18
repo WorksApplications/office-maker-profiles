@@ -160,7 +160,7 @@ describe('Profile Lambda', () => {
         "queryStringParameters": {
           "q": "yamada"
         }
-      }, {}).then(assertProfileLength(1));
+      }, {}).then(assertProfileLength(2));
     });
     it('should NOT search profiles by q (match to mail, upper case)', () => {
       return handlerToPromise(profilesQuery.handler)({

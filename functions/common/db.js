@@ -34,6 +34,7 @@ function convertProfileBeforeSave(profile) {
   profile.employeeId = profile.employeeId || '???';
   profile.mail = profile.mail || '???';
   profile.normalizedMailBeforeAt = (profile.mail || '').split('@')[0] || '???';
+  profile.normalizedMailBeforeUnderscore = (profile.mail || '').split('_')[0] || '???';
   profile.normalizedPost = searchHelper.normalize(profile.post) || '???';
   profile.normalizedOrganization = searchHelper.normalize(profile.organization) || '???';
   return profile;
