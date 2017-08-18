@@ -1,9 +1,9 @@
+var headers = require('./headers.js');
+
 function send(callback, statusCode, data) {
   callback(null, {
     statusCode: statusCode,
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: headers,
     body: data ? JSON.stringify(data) : ''
   });
 }
