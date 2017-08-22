@@ -1,4 +1,3 @@
-var readline = require('readline');
 var find = require('find');
 var fs = require('fs');
 var childProcess = require('child_process');
@@ -7,15 +6,7 @@ var AWS = require('aws-sdk');
 var archiver = require('archiver');
 var yaml = require('js-yaml');
 
-var project;
-if (fs.existsSync('./project.json')) {
-  project = JSON.parse(fs.readFileSync('./project.json', 'utf8'));
-} else if (fs.existsSync('./project.yml')) {
-  project = yaml.safeLoad(fs.readFileSync('./project.yml', 'utf8'));
-} else {
-  project = yaml.safeLoad(fs.readFileSync('./project.yaml', 'utf8'));
-}
-var env = project.env || {};
+var project = JSON.parse(fs.readFileSync('./project.json', 'utf8'));
 
 var cloudformation = new AWS.CloudFormation({
   region: project.region
@@ -28,23 +19,16 @@ var templateFile = './template.yml';
 var outputTemplateFile = './template_out.yml';
 var funcDir = './functions';
 
-
 rmdir('./node_modules').then(_ => {
   return generateSwaggerYml(project.accountId, project.region).then(_ => {
-    return npmInstall(true).then(_ => {
+    return npmInstall('.', true).then(_ => {
       return cloudFormationPackage(templateFile, outputTemplateFile, project.s3Bucket).then(_ => {
-
         var s = fs.readFileSync(outputTemplateFile, 'utf8');
-        Object.keys(env).forEach(key => {
-          var value = env[key];
-          s = s.replace('__' + key + '__', value);
-        });
         fs.writeFileSync(outputTemplateFile, s);
-
         return cloudFormationDeploy(outputTemplateFile, project.stackName);
       });
     });
-  }).then(_ => npmInstall(false));
+  }).then(_ => npmInstall('.', false));
 }).then(result => {
   result && console.log(result);
 }).catch(e => {
@@ -76,10 +60,10 @@ function rmdir(path) {
   });
 }
 
-function npmInstall(prod) {
+function npmInstall(cwd, prod) {
   return new Promise((resolve, reject) => {
     childProcess.exec('npm install' + (prod ? ' --production' : ''), {
-      cwd: '.'
+      cwd: cwd
     }, function(e) {
       if (e) {
         reject(e);
