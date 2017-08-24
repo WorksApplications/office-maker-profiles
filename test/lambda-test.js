@@ -9,7 +9,7 @@ var options = require('../functions/common/db-options.js');
 var dynamodb = new AWS.DynamoDB(options);
 var documentClient = new AWS.DynamoDB.DocumentClient(options);
 var yaml = require('js-yaml');
-var templateOutYml = yaml.safeLoad(fs.readFileSync('./template_out.yml', 'utf8'));
+// var templateOutYml = yaml.safeLoad(fs.readFileSync('./template_out.yml', 'utf8'));
 var assert = require('assert');
 
 var profilesGet = require('../functions/profiles/get.js');
@@ -24,7 +24,7 @@ var port = 4569;
 // temporary
 var tableDefYaml = fs.readFileSync(__dirname + '/test-table.yml', 'utf8');
 var table2DefYaml = fs.readFileSync(__dirname + '/test-table2.yml', 'utf8');
-
+var table3DefYaml = fs.readFileSync(__dirname + '/search-table.yml', 'utf8');
 
 describe('Profile Lambda', () => {
   var dbProcess = null;
@@ -40,6 +40,10 @@ describe('Profile Lambda', () => {
       }).then(_ => {
         // var tableDef = templateOutYml.Resources.ProfilesSearchHelpTable.Properties;
         var tableDef = yaml.safeLoad(table2DefYaml).Properties;
+        return dynamoUtil.createTable(dynamodb, tableDef);
+      }).then(_ => {
+        // var tableDef = templateOutYml.Resources.ProfilesSearchHelpTable.Properties;
+        var tableDef = yaml.safeLoad(table3DefYaml).Properties;
         return dynamoUtil.createTable(dynamodb, tableDef);
       });
     });

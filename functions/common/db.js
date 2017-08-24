@@ -40,9 +40,37 @@ function convertProfileBeforeSave(profile) {
   return profile;
 }
 
-function putProfile(profile) {
-  profile = convertProfileBeforeSave(profile);
+function putProfile(originalProfile) {
+  var profile = convertProfileBeforeSave(originalProfile);
   profile = dynamoUtil.emptyToNull(profile);
+
+  var searchRecords = [{
+    key: profile.normalizedName,
+    type: 'name1'
+  }, {
+    key: profile.normalizedName,
+    type: 'name2'
+  }, {
+    key: profile.normalizedRuby1,
+    type: 'ruby'
+  }, {
+    key: profile.employeeId,
+    type: 'employeeId'
+  }, {
+    key: profile.mail,
+    type: 'mail'
+  }, {
+    key: profile.normalizedMailBeforeAt,
+    type: 'mailBeforeAt'
+  }, {
+    key: profile.normalizedMailBeforeUnderscore,
+    type: 'mailBeforeUnderscore'
+  }, {
+    key: profile.normalizedPost,
+    type: 'post'
+  }].map(base => {
+    return Object.assign({}, base, dynamoUtil.emptyToNull(originalProfile));
+  });
 
   return dynamoUtil.put(documentClient, {
     TableName: "profiles",
@@ -52,6 +80,17 @@ function putProfile(profile) {
       TableName: "profilesSearchHelp",
       Item: profile
     });
+  }).then(_ => {
+    //TODO batch
+    return searchRecords.reduce((p, record) => {
+      // console.log(record);
+      return p.then(_ => {
+        return dynamoUtil.put(documentClient, {
+          TableName: "profilesSearch",
+          Item: record
+        });
+      });
+    }, Promise.resolve());
   });
 }
 var patchProfile = putProfile;
