@@ -182,14 +182,14 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: profiles_authorizer
-      Handler: functions/authorizer/index.handler
+      Handler: authorizer/index.handler
       Runtime: nodejs6.10
 
   ProfilesQuery:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: profiles_profiles_query
-      Handler: functions/profiles/query.handler
+      Handler: profiles/query.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBReadOnlyAccess
       Timeout: 30
@@ -198,7 +198,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: profiles_profiles_get
-      Handler: functions/profiles/get.handler
+      Handler: profiles/get.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBReadOnlyAccess
 
@@ -206,7 +206,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: profiles_profiles_put
-      Handler: functions/profiles/put.handler
+      Handler: profiles/put.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
 
@@ -214,7 +214,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: profiles_profiles_patch
-      Handler: functions/profiles/patch.handler
+      Handler: profiles/patch.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
 
@@ -222,7 +222,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: profiles_profiles_delete
-      Handler: functions/profiles/delete.handler
+      Handler: profiles/delete.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
 
@@ -230,7 +230,7 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: dev
-      DefinitionUri: swagger.yml
+      DefinitionUri: ../swagger.yml
       Variables:
         LambdaAlias: DEV
 

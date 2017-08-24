@@ -1,9 +1,7 @@
-var find = require('find');
 var fs = require('fs');
 var childProcess = require('child_process');
 var Path = require('path');
 var AWS = require('aws-sdk');
-var archiver = require('archiver');
 var yaml = require('js-yaml');
 
 var project = JSON.parse(fs.readFileSync('./project.json', 'utf8'));
@@ -15,20 +13,22 @@ var s3 = new AWS.S3({
   region: project.region
 });
 
-var templateFile = './template.yml';
-var outputTemplateFile = './template_out.yml';
-var funcDir = './functions';
+var templateFile = Path.resolve('./functions/template.yml');
+var outputTemplateFile = Path.resolve('./functions/template_out.yml');
+var funcDir = Path.resolve('./functions');
 
-rmdir('./node_modules').then(_ => {
+rmdir(funcDir + '/node_modules').then(_ => {
   return generateSwaggerYml(project.accountId, project.region).then(_ => {
-    return npmInstall('.', true).then(_ => {
-      return cloudFormationPackage(templateFile, outputTemplateFile, project.s3Bucket).then(_ => {
+    return npmInstall(funcDir, true).then(_ => {
+      return cloudFormationPackage(funcDir, templateFile, outputTemplateFile, project.s3Bucket).then(_ => {
         var s = fs.readFileSync(outputTemplateFile, 'utf8');
         fs.writeFileSync(outputTemplateFile, s);
-        return cloudFormationDeploy(outputTemplateFile, project.stackName);
+        return cloudFormationDeploy(funcDir, outputTemplateFile, project.stackName);
       });
     });
-  }).then(_ => npmInstall('.', false));
+  }).then(_ => {
+    return npmInstall(funcDir, false);
+  });
 }).then(result => {
   result && console.log(result);
 }).catch(e => {
@@ -46,20 +46,6 @@ function generateSwaggerYml(accountId, region) {
   return Promise.resolve();
 }
 
-function rmdir(path) {
-  return new Promise((resolve, reject) => {
-    childProcess.exec('rm -r ' + path, {
-      cwd: '.'
-    }, function(e) {
-      if (e) {
-        reject(e);
-      } else {
-        resolve();
-      }
-    });
-  });
-}
-
 function npmInstall(cwd, prod) {
   return new Promise((resolve, reject) => {
     childProcess.exec('npm install' + (prod ? ' --production' : ''), {
@@ -74,8 +60,8 @@ function npmInstall(cwd, prod) {
   });
 }
 
-function cloudFormationPackage(templateFile, outputTemplateFile, s3Bucket) {
-  return spawnCommand('aws', [
+function cloudFormationPackage(funcDir, templateFile, outputTemplateFile, s3Bucket) {
+  return spawnCommand(funcDir, 'aws', [
     'cloudformation',
     'package',
     '--template-file',
@@ -87,8 +73,8 @@ function cloudFormationPackage(templateFile, outputTemplateFile, s3Bucket) {
   ]);
 }
 
-function cloudFormationDeploy(templateFile, stackName) {
-  return spawnCommand('aws', [
+function cloudFormationDeploy(funcDir, templateFile, stackName) {
+  return spawnCommand(funcDir, 'aws', [
     'cloudformation',
     'deploy',
     '--template-file',
@@ -100,14 +86,30 @@ function cloudFormationDeploy(templateFile, stackName) {
   ]);
 }
 
-function spawnCommand(command, args) {
+function spawnCommand(cwd, command, args) {
+  console.log('cwd:', cwd);
   console.log('exec:', command + ' ' + args.join(' '));
   return new Promise((resolve, reject) => {
     childProcess.spawn(command, (args || []), {
+      cwd: cwd,
       stdio: 'inherit'
     }).on('close', code => {
       if (code) {
         reject('exited with code ' + code);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
+function rmdir(path) {
+  return new Promise((resolve, reject) => {
+    childProcess.exec('rm -r ' + path, {
+      cwd: '.'
+    }, function(e) {
+      if (e) {
+        reject(e);
       } else {
         resolve();
       }
