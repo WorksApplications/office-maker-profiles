@@ -7,176 +7,32 @@ Resources:
     Properties:
       TableName: profiles
       AttributeDefinitions:
-        - AttributeName: userId
-          AttributeType: S
-        - AttributeName: employeeId
-          AttributeType: S
-        - AttributeName: normalizedName1
-          AttributeType: S
-        - AttributeName: normalizedName2
-          AttributeType: S
-        - AttributeName: normalizedRuby1
-          AttributeType: S
-        - AttributeName: normalizedRuby2
-          AttributeType: S
+      - AttributeName: userId
+        AttributeType: S
       KeySchema:
-        -
-          AttributeName: userId
-          KeyType: HASH
+      - AttributeName: userId
+        KeyType: HASH
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      GlobalSecondaryIndexes:
-        -
-          IndexName: profilesName1Index
-          KeySchema:
-            -
-              AttributeName: normalizedName1
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
-        -
-          IndexName: profilesName2Index
-          KeySchema:
-            -
-              AttributeName: normalizedName2
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
-        -
-          IndexName: profilesRuby1Index
-          KeySchema:
-            -
-              AttributeName: normalizedRuby1
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
-        -
-          IndexName: profilesRuby2Index
-          KeySchema:
-            -
-              AttributeName: normalizedRuby2
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
-        -
-          IndexName: profilesEmployeeIdIndex
-          KeySchema:
-            -
-              AttributeName: employeeId
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
 
-  ProfilesSearchHelpTable:
+  ProfilesSearchTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: profilesSearchHelp
+      TableName: profilesSearch
       AttributeDefinitions:
-        - AttributeName: userId
+        - AttributeName: key
           AttributeType: S
-        - AttributeName: post
+        - AttributeName: type
           AttributeType: S
-        - AttributeName: mail
-          AttributeType: S
-        - AttributeName: normalizedMailBeforeAt
-          AttributeType: S
-        # - AttributeName: normalizedMailBeforeUnderscore
-        #   AttributeType: S
       KeySchema:
-        -
-          AttributeName: userId
+        - AttributeName: key
           KeyType: HASH
+        - AttributeName: type
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      GlobalSecondaryIndexes:
-        -
-          IndexName: profilesPostIndex
-          KeySchema:
-            -
-              AttributeName: post
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
-        -
-          IndexName: profilesMailIndex
-          KeySchema:
-            -
-              AttributeName: mail
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
-        -
-          IndexName: profilesMailBeforeAtIndex
-          KeySchema:
-            -
-              AttributeName: normalizedMailBeforeAt
-              KeyType: HASH
-            -
-              AttributeName: userId
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
-        # -
-        #   IndexName: profilesMailBeforeUnderscoreIndex
-        #   KeySchema:
-        #     -
-        #       AttributeName: normalizedMailBeforeUnderscore
-        #       KeyType: HASH
-        #     -
-        #       AttributeName: userId
-        #       KeyType: RANGE
-        #   Projection:
-        #     ProjectionType: ALL
-        #   ProvisionedThroughput:
-        #     ReadCapacityUnits: 1
-        #     WriteCapacityUnits: 1
 
   Authorizer:
     Type: AWS::Serverless::Function
