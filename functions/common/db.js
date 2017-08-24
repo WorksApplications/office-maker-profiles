@@ -49,7 +49,6 @@ function convertProfileBeforeSave(profile) {
 //   });
 // }
 
-
 function putProfile(originalProfile) {
   var profile = convertProfileBeforeSave(originalProfile);
   profile = dynamoUtil.emptyToNull(profile);
@@ -70,10 +69,10 @@ function putProfile(originalProfile) {
   });
 
   var searchRecords = Object.keys(keys).map(key => {
-    var profile = dynamoUtil.emptyToNull(originalProfile);
-    return Object.assign({}, profile, {
-      key: key
-    });
+    return {
+      key: key,
+      userId: profile.userId,
+    };
   });
 
   return dynamoUtil.put(documentClient, {
@@ -84,7 +83,7 @@ function putProfile(originalProfile) {
     return searchRecords.reduce((p, record) => {
       return p.then(_ => {
         return dynamoUtil.put(documentClient, {
-          TableName: "profilesSearch",
+          TableName: "profilesSearchHelp",
           Item: record
         });
       });
@@ -104,6 +103,11 @@ function deleteProfile(userId) {
 }
 
 function findProfileByUserIds(userIds, limit, exclusiveStartKey) {
+  if (userIds.length === 0) {
+    return Promise.resolve({
+      profiles: []
+    });
+  }
   return dynamoUtil.batchGet(documentClient, {
     RequestItems: {
       'profiles': {
@@ -143,7 +147,7 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
   var searches = qs.map(q => {
     var normalizedQ = searchHelper.normalize(q);
     return dynamoUtil.query(documentClient, {
-      TableName: 'profilesSearch',
+      TableName: 'profilesSearchHelp',
       KeyConditionExpression: '#key = :key',
       ExpressionAttributeNames: {
         "#key": "key"
@@ -152,25 +156,27 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
         ":key": normalizedQ
       }
     }).then(data => {
-      return Promise.resolve(data.Items.map(deleteExtraFields));
+      return Promise.resolve(data.Items);
     });
   });
 
   var start = Date.now();
-  return Promise.all(searches).then(profilesList => {
+  return Promise.all(searches).then(recordsList => {
     var dict = {};
     var count = {};
-    profilesList.forEach(profiles => {
-      profiles.forEach(profile => {
-        dict[profile.userId] = profile;
-        count[profile.userId] = (count[profile.userId] || 0) + 1;
+    recordsList.forEach(records => {
+      records.forEach(record => {
+        dict[record.userId] = true;
+        count[record.userId] = (count[record.userId] || 0) + 1;
       });
     });
-    log('got ' + Object.keys(dict).length, 'took ' + (Date.now() - start) + 'ms');
-    return Promise.resolve({
-      profiles: Object.keys(dict).map(key => dict[key]).sort((a, b) => {
+    var userIds = Object.keys(dict);
+    return findProfileByUserIds(userIds, limit).then(res => {
+      log('got ' + res.profiles.length, 'took ' + (Date.now() - start) + 'ms');
+      res.profiles = res.profiles.sort((a, b) => {
         return count[b.userId] - count[a.userId];
-      })
+      });
+      return res;
     });
   });
 }

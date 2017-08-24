@@ -16,10 +16,10 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 
-  ProfilesSearchTable:
+  profilesSearchHelpTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: profilesSearch
+      TableName: profilesSearchHelp
       AttributeDefinitions:
         - AttributeName: key
           AttributeType: S
