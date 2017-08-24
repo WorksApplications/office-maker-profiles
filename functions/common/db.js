@@ -40,41 +40,39 @@ function convertProfileBeforeSave(profile) {
   return profile;
 }
 
+// function putProfile(profile) {
+//   profile = convertProfileBeforeSave(profile);
+//   profile = dynamoUtil.emptyToNull(profile);
+//   return dynamoUtil.put(documentClient, {
+//     TableName: "profiles",
+//     Item: dynamoUtil.emptyToNull(profile)
+//   });
+// }
+
+
 function putProfile(originalProfile) {
   var profile = convertProfileBeforeSave(originalProfile);
   profile = dynamoUtil.emptyToNull(profile);
 
-  var searchRecords = [{
-    key: profile.normalizedName1,
-    type: 'name1'
-  }, {
-    key: profile.normalizedName2,
-    type: 'name2'
-  }, {
-    key: profile.normalizedRuby1,
-    type: 'ruby1'
-  }, {
-    key: profile.normalizedRuby2,
-    type: 'ruby2'
-  }, {
-    key: profile.employeeId,
-    type: 'employeeId'
-  }, {
-    key: profile.mail,
-    type: 'mail'
-  }, {
-    key: profile.normalizedMailBeforeAt,
-    type: 'mailBeforeAt'
-  }, {
-    key: profile.normalizedMailBeforeUnderscore,
-    type: 'mailBeforeUnderscore'
-  }, {
-    key: profile.normalizedPost,
-    type: 'post'
-  }].map(base => {
+  var keys = {};
+  [
+    profile.normalizedName1,
+    profile.normalizedName2,
+    profile.normalizedRuby1,
+    profile.normalizedRuby2,
+    profile.employeeId,
+    profile.mail,
+    profile.normalizedMailBeforeAt,
+    profile.normalizedMailBeforeUnderscore,
+    profile.normalizedPost
+  ].forEach(key => {
+    keys[key] = true;
+  });
+
+  var searchRecords = Object.keys(keys).map(key => {
     var profile = dynamoUtil.emptyToNull(originalProfile);
-    return Object.assign({}, base, profile, {
-      type: base.type + ':' + profile.userId
+    return Object.assign({}, profile, {
+      key: key
     });
   });
 
@@ -93,6 +91,7 @@ function putProfile(originalProfile) {
     }, Promise.resolve());
   });
 }
+
 var patchProfile = putProfile;
 
 function deleteProfile(userId) {
@@ -131,7 +130,6 @@ function deleteExtraFields(profile) {
   }
   profile = Object.assign({}, profile);
   delete profile.key;
-  delete profile.type;
   return profile;
 }
 

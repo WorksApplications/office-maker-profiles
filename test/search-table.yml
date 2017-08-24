@@ -3,12 +3,12 @@ Properties:
   AttributeDefinitions:
     - AttributeName: key
       AttributeType: S
-    - AttributeName: type
+    - AttributeName: userId
       AttributeType: S
   KeySchema:
     - AttributeName: key
       KeyType: HASH
-    - AttributeName: type
+    - AttributeName: userId
       KeyType: RANGE
   ProvisionedThroughput:
     ReadCapacityUnits: 1
