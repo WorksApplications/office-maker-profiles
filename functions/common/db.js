@@ -12,7 +12,7 @@ function getProfile(userId) {
       userId: userId
     }
   }).then(data => {
-    return Promise.resolve(deleteExtraFields(data.Item));
+    return Promise.resolve(data.Item);
   });
 }
 
@@ -119,7 +119,7 @@ function findProfileByUserIds(userIds, limit, exclusiveStartKey) {
     ExclusiveStartKey: exclusiveStartKey ? JSON.parse(exclusiveStartKey) : undefined
   }).then(data => {
     return Promise.resolve({
-      profiles: data.Responses['profiles'].map(deleteExtraFields),
+      profiles: data.Responses['profiles'],
       lastEvaluatedKey: JSON.stringify(data.LastEvaluatedKey)
     });
   });
