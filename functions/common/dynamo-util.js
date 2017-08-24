@@ -29,6 +29,7 @@ module.exports = {
   delete: exec('delete'),
   scan: exec('scan'),
   batchGet: exec('batchGet'),
+  batchWrite: exec('batchWrite'),
   query: exec('query'),
   createTable: exec('createTable')
 };

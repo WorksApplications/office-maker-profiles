@@ -79,15 +79,18 @@ function putProfile(originalProfile) {
     TableName: "profiles",
     Item: dynamoUtil.emptyToNull(originalProfile)
   }).then(_ => {
-    //TODO batch
-    return searchRecords.reduce((p, record) => {
-      return p.then(_ => {
-        return dynamoUtil.put(documentClient, {
-          TableName: "profilesSearchHelp",
+    var requests = searchRecords.map(record => {
+      return {
+        PutRequest: {
           Item: record
-        });
-      });
-    }, Promise.resolve());
+        }
+      };
+    });
+    return dynamoUtil.batchWrite(documentClient, {
+      RequestItems: {
+        'profilesSearchHelp': requests
+      }
+    });
   });
 }
 
