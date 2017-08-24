@@ -12,7 +12,7 @@ function getProfile(userId) {
       userId: userId
     }
   }).then(data => {
-    return Promise.resolve(deleteNormalizedFields(data.Item));
+    return Promise.resolve(deleteExtraFields(data.Item));
   });
 }
 
@@ -72,7 +72,10 @@ function putProfile(originalProfile) {
     key: profile.normalizedPost,
     type: 'post'
   }].map(base => {
-    return Object.assign({}, base, dynamoUtil.emptyToNull(originalProfile));
+    var profile = dynamoUtil.emptyToNull(originalProfile);
+    return Object.assign({}, base, profile, {
+      type: base.type + ':' + profile.userId
+    });
   });
 
   return dynamoUtil.put(documentClient, {
@@ -81,7 +84,6 @@ function putProfile(originalProfile) {
   }).then(_ => {
     //TODO batch
     return searchRecords.reduce((p, record) => {
-      // console.log(record);
       return p.then(_ => {
         return dynamoUtil.put(documentClient, {
           TableName: "profilesSearch",
@@ -99,13 +101,6 @@ function deleteProfile(userId) {
     Key: {
       userId: userId
     }
-  }).then(_ => {
-    return dynamoUtil.delete(documentClient, {
-      TableName: "profilesSearchHelp",
-      Key: {
-        userId: userId
-      }
-    });
   });
 }
 
@@ -124,38 +119,20 @@ function findProfileByUserIds(userIds, limit, exclusiveStartKey) {
     ExclusiveStartKey: exclusiveStartKey ? JSON.parse(exclusiveStartKey) : undefined
   }).then(data => {
     return Promise.resolve({
-      profiles: data.Responses['profiles'].map(deleteNormalizedFields),
+      profiles: data.Responses['profiles'].map(deleteExtraFields),
       lastEvaluatedKey: JSON.stringify(data.LastEvaluatedKey)
     });
   });
 }
 
-function deleteNormalizedFields(profile) {
+function deleteExtraFields(profile) {
   if (!profile) {
     return null;
   }
   profile = Object.assign({}, profile);
-  Object.keys(profile).forEach(key => {
-    if (key.indexOf('normalized') === 0) {
-      delete profile[key];
-    }
-  });
+  delete profile.key;
+  delete profile.type;
   return profile;
-}
-
-function makeSearchs(q, normalizedQ) {
-  return [
-    queryHelpName1(normalizedQ),
-    queryHelpName2(normalizedQ),
-    queryHelpRuby1(normalizedQ),
-    queryHelpRuby2(normalizedQ),
-    queryHelpPost(q),
-    queryHelpEmployeeId(q),
-  ].concat(normalizedQ === q ? [ // lower case string
-    queryHelpMail(q),
-    queryHelpMailBeforeAt(q),
-    queryHelpMailBeforeUnderscore(q)
-  ] : []);
 }
 
 function findProfileByQuery(q, limit, exclusiveStartKey) {
@@ -177,7 +154,7 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
         ":key": normalizedQ
       }
     }).then(data => {
-      return Promise.resolve(data.Items.map(deleteNormalizedFields));
+      return Promise.resolve(data.Items.map(deleteExtraFields));
     });
   });
 
@@ -197,159 +174,6 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
         return count[b.userId] - count[a.userId];
       })
     });
-  });
-}
-
-
-// function findProfileByQuery(q, limit, exclusiveStartKey) {
-//   var searches;
-//   if (q[0] === '"' && q[q.length - 1] === '"') {
-//     q = q.substring(1, q.length - 1);
-//     var normalizedQ = searchHelper.normalize(q);
-//     searches = makeSearchs(q, normalizedQ);
-//   } else {
-//     var qs = searchHelper.normalizeSpace(q).split(' ');
-//     searches = qs.map(q => {
-//       var normalizedQ = searchHelper.normalize(q);
-//       return makeSearchs(q, normalizedQ);
-//     }).reduce((memo, searches) => {
-//       return memo.concat(searches);
-//     }, []);
-//   }
-//
-//   var start = Date.now();
-//   return Promise.all(searches).then(profilesList => {
-//     var dict = {};
-//     var count = {};
-//     profilesList.forEach(profiles => {
-//       profiles.forEach(profile => {
-//         dict[profile.userId] = profile;
-//         count[profile.userId] = (count[profile.userId] || 0) + 1;
-//       });
-//     });
-//     log('got ' + Object.keys(dict).length, 'took ' + (Date.now() - start) + 'ms');
-//     return Promise.resolve({
-//       profiles: Object.keys(dict).map(key => dict[key]).sort((a, b) => {
-//         return count[b.userId] - count[a.userId];
-//       })
-//     });
-//   });
-// }
-
-function queryHelpName1(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profiles',
-    IndexName: "profilesName1Index",
-    KeyConditionExpression: 'normalizedName1 = :normalizedName1',
-    ExpressionAttributeValues: {
-      ":normalizedName1": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
-  });
-}
-
-function queryHelpName2(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profiles',
-    IndexName: "profilesName2Index",
-    KeyConditionExpression: 'normalizedName2 = :normalizedName2',
-    ExpressionAttributeValues: {
-      ":normalizedName2": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
-  });
-}
-
-function queryHelpRuby1(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profiles',
-    IndexName: "profilesRuby1Index",
-    KeyConditionExpression: 'normalizedRuby1 = :normalizedRuby1',
-    ExpressionAttributeValues: {
-      ":normalizedRuby1": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
-  });
-}
-
-function queryHelpRuby2(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profiles',
-    IndexName: "profilesRuby2Index",
-    KeyConditionExpression: 'normalizedRuby2 = :normalizedRuby2',
-    ExpressionAttributeValues: {
-      ":normalizedRuby2": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
-  });
-}
-
-function queryHelpEmployeeId(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profiles',
-    IndexName: "profilesEmployeeIdIndex",
-    KeyConditionExpression: 'employeeId = :employeeId',
-    ExpressionAttributeValues: {
-      ":employeeId": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
-  });
-}
-
-function queryHelpMail(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profilesSearchHelp',
-    IndexName: "profilesMailIndex",
-    KeyConditionExpression: 'mail = :mail',
-    ExpressionAttributeValues: {
-      ":mail": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
-  });
-}
-
-function queryHelpMailBeforeAt(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profilesSearchHelp',
-    IndexName: "profilesMailBeforeAtIndex",
-    KeyConditionExpression: 'normalizedMailBeforeAt = :normalizedMailBeforeAt',
-    ExpressionAttributeValues: {
-      ":normalizedMailBeforeAt": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
-  });
-}
-
-function queryHelpMailBeforeUnderscore(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profilesSearchHelp',
-    IndexName: "profilesMailBeforeUnderscoreIndex",
-    KeyConditionExpression: 'normalizedMailBeforeUnderscore = :normalizedMailBeforeUnderscore',
-    ExpressionAttributeValues: {
-      ":normalizedMailBeforeUnderscore": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
-  });
-}
-
-function queryHelpPost(q) {
-  return dynamoUtil.query(documentClient, {
-    TableName: 'profilesSearchHelp',
-    IndexName: "profilesPostIndex",
-    KeyConditionExpression: 'post = :post',
-    ExpressionAttributeValues: {
-      ":post": q
-    }
-  }).then(data => {
-    return Promise.resolve(data.Items.map(deleteNormalizedFields));
   });
 }
 

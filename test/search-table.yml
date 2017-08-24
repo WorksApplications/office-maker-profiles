@@ -6,11 +6,9 @@ Properties:
     - AttributeName: type
       AttributeType: S
   KeySchema:
-    -
-      AttributeName: key
+    - AttributeName: key
       KeyType: HASH
-    -
-      AttributeName: type
+    - AttributeName: type
       KeyType: RANGE
   ProvisionedThroughput:
     ReadCapacityUnits: 1

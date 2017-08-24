@@ -23,8 +23,7 @@ var port = 4569;
 
 // temporary
 var tableDefYaml = fs.readFileSync(__dirname + '/test-table.yml', 'utf8');
-var table2DefYaml = fs.readFileSync(__dirname + '/test-table2.yml', 'utf8');
-var table3DefYaml = fs.readFileSync(__dirname + '/search-table.yml', 'utf8');
+var searchTableDefYaml = fs.readFileSync(__dirname + '/search-table.yml', 'utf8');
 
 describe('Profile Lambda', () => {
   var dbProcess = null;
@@ -38,12 +37,7 @@ describe('Profile Lambda', () => {
         var tableDef = yaml.safeLoad(tableDefYaml).Properties;
         return dynamoUtil.createTable(dynamodb, tableDef);
       }).then(_ => {
-        // var tableDef = templateOutYml.Resources.ProfilesSearchHelpTable.Properties;
-        var tableDef = yaml.safeLoad(table2DefYaml).Properties;
-        return dynamoUtil.createTable(dynamodb, tableDef);
-      }).then(_ => {
-        // var tableDef = templateOutYml.Resources.ProfilesSearchHelpTable.Properties;
-        var tableDef = yaml.safeLoad(table3DefYaml).Properties;
+        var tableDef = yaml.safeLoad(searchTableDefYaml).Properties;
         return dynamoUtil.createTable(dynamodb, tableDef);
       });
     });
@@ -165,13 +159,6 @@ describe('Profile Lambda', () => {
           "q": "yamada"
         }
       }, {}).then(assertProfileLength(2));
-    });
-    it('should NOT search profiles by q (match to mail, upper case)', () => {
-      return handlerToPromise(profilesQuery.handler)({
-        "queryStringParameters": {
-          "q": "YAMADA_T"
-        }
-      }, {}).then(assertProfileLength(0));
     });
     it('should search profiles by q (match to employeeId)', () => {
       return handlerToPromise(profilesQuery.handler)({
