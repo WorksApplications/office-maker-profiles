@@ -217,41 +217,41 @@ describe('Profile Lambda', () => {
     });
   });
   describe('GET /profiles (large)', () => {
-    // var count = 3000;
-    var totalCount = 120; //
-    before(function() {
-      this.timeout(30 * 1000);
-      return Array.from(Array(totalCount).keys()).reduce((p, i) => {
-        return p.then(_ => {
-          var mail = `user${i}@example.com`;
-          return db.putProfile({
-            userId: mail,
-            picture: null,
-            name: '竹中 洋子',
-            ruby: 'たけなか ようこ',
-            employeeId: '1234',
-            organization: 'Example Co., Ltd.',
-            post: 'Tech',
-            rank: 'Manager',
-            cellPhone: '080-XXX-4567',
-            extensionPhone: 'XXXXX',
-            mail: mail,
-            workplace: null
-          });
-        });
-      }, Promise.resolve());
-    });
-    it('should search', () => {
-      return handlerToPromise(profilesQuery.handler)({
-        "queryStringParameters": {
-          "q": "竹中"
-        }
-      }, {}).then(assertStatus(200)).then(res => {
-        var profiles = JSON.parse(res.body).profiles;
-        // console.log('found', profiles.length);
-        return Promise.resolve();
-      });
-    });
+    // // var count = 3000;
+    // var totalCount = 120; //
+    // before(function() {
+    //   this.timeout(30 * 1000);
+    //   return Array.from(Array(totalCount).keys()).reduce((p, i) => {
+    //     return p.then(_ => {
+    //       var mail = `user${i}@example.com`;
+    //       return db.putProfile({
+    //         userId: mail,
+    //         picture: null,
+    //         name: '竹中 洋子',
+    //         ruby: 'たけなか ようこ',
+    //         employeeId: '1234',
+    //         organization: 'Example Co., Ltd.',
+    //         post: 'Tech',
+    //         rank: 'Manager',
+    //         cellPhone: '080-XXX-4567',
+    //         extensionPhone: 'XXXXX',
+    //         mail: mail,
+    //         workplace: null
+    //       });
+    //     });
+    //   }, Promise.resolve());
+    // });
+    // it('should search', () => {
+    //   return handlerToPromise(profilesQuery.handler)({
+    //     "queryStringParameters": {
+    //       "q": "竹中"
+    //     }
+    //   }, {}).then(assertStatus(200)).then(res => {
+    //     var profiles = JSON.parse(res.body).profiles;
+    //     // console.log('found', profiles.length);
+    //     return Promise.resolve();
+    //   });
+    // });
     // it('should work with limit', function() {
     //   this.timeout(30 * 1000);
     //

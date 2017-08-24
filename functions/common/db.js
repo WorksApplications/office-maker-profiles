@@ -45,14 +45,17 @@ function putProfile(originalProfile) {
   profile = dynamoUtil.emptyToNull(profile);
 
   var searchRecords = [{
-    key: profile.normalizedName,
+    key: profile.normalizedName1,
     type: 'name1'
   }, {
-    key: profile.normalizedName,
+    key: profile.normalizedName2,
     type: 'name2'
   }, {
     key: profile.normalizedRuby1,
-    type: 'ruby'
+    type: 'ruby1'
+  }, {
+    key: profile.normalizedRuby2,
+    type: 'ruby2'
   }, {
     key: profile.employeeId,
     type: 'employeeId'
@@ -74,12 +77,7 @@ function putProfile(originalProfile) {
 
   return dynamoUtil.put(documentClient, {
     TableName: "profiles",
-    Item: profile
-  }).then(_ => {
-    return dynamoUtil.put(documentClient, {
-      TableName: "profilesSearchHelp",
-      Item: profile
-    });
+    Item: dynamoUtil.emptyToNull(originalProfile)
   }).then(_ => {
     //TODO batch
     return searchRecords.reduce((p, record) => {
@@ -161,20 +159,27 @@ function makeSearchs(q, normalizedQ) {
 }
 
 function findProfileByQuery(q, limit, exclusiveStartKey) {
-  var searches;
+  var qs;
   if (q[0] === '"' && q[q.length - 1] === '"') {
-    q = q.substring(1, q.length - 1);
-    var normalizedQ = searchHelper.normalize(q);
-    searches = makeSearchs(q, normalizedQ);
+    qs = [q.substring(1, q.length - 1)];
   } else {
-    var qs = searchHelper.normalizeSpace(q).split(' ');
-    searches = qs.map(q => {
-      var normalizedQ = searchHelper.normalize(q);
-      return makeSearchs(q, normalizedQ);
-    }).reduce((memo, searches) => {
-      return memo.concat(searches);
-    }, []);
+    qs = searchHelper.normalizeSpace(q).split(' ');
   }
+  var searches = qs.map(q => {
+    var normalizedQ = searchHelper.normalize(q);
+    return dynamoUtil.query(documentClient, {
+      TableName: 'profilesSearch',
+      KeyConditionExpression: '#key = :key',
+      ExpressionAttributeNames: {
+        "#key": "key"
+      },
+      ExpressionAttributeValues: {
+        ":key": normalizedQ
+      }
+    }).then(data => {
+      return Promise.resolve(data.Items.map(deleteNormalizedFields));
+    });
+  });
 
   var start = Date.now();
   return Promise.all(searches).then(profilesList => {
@@ -194,6 +199,42 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
     });
   });
 }
+
+
+// function findProfileByQuery(q, limit, exclusiveStartKey) {
+//   var searches;
+//   if (q[0] === '"' && q[q.length - 1] === '"') {
+//     q = q.substring(1, q.length - 1);
+//     var normalizedQ = searchHelper.normalize(q);
+//     searches = makeSearchs(q, normalizedQ);
+//   } else {
+//     var qs = searchHelper.normalizeSpace(q).split(' ');
+//     searches = qs.map(q => {
+//       var normalizedQ = searchHelper.normalize(q);
+//       return makeSearchs(q, normalizedQ);
+//     }).reduce((memo, searches) => {
+//       return memo.concat(searches);
+//     }, []);
+//   }
+//
+//   var start = Date.now();
+//   return Promise.all(searches).then(profilesList => {
+//     var dict = {};
+//     var count = {};
+//     profilesList.forEach(profiles => {
+//       profiles.forEach(profile => {
+//         dict[profile.userId] = profile;
+//         count[profile.userId] = (count[profile.userId] || 0) + 1;
+//       });
+//     });
+//     log('got ' + Object.keys(dict).length, 'took ' + (Date.now() - start) + 'ms');
+//     return Promise.resolve({
+//       profiles: Object.keys(dict).map(key => dict[key]).sort((a, b) => {
+//         return count[b.userId] - count[a.userId];
+//       })
+//     });
+//   });
+// }
 
 function queryHelpName1(q) {
   return dynamoUtil.query(documentClient, {
