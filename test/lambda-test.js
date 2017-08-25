@@ -42,6 +42,10 @@ describe('Profile Lambda', () => {
       });
     });
   });
+  after(function() {
+    dbProcess.kill();
+  });
+
   beforeEach(() => {
     return db.putProfile({
       userId: 'yamada_t@example.com',
