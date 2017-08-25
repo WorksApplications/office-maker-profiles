@@ -74,6 +74,7 @@ function putProfile(originalProfile) {
       userId: profile.userId,
     };
   });
+  console.log('searchRecords', searchRecords);
 
   return dynamoUtil.put(documentClient, {
     TableName: "profiles",
@@ -89,6 +90,15 @@ function putProfile(originalProfile) {
     return dynamoUtil.batchWrite(documentClient, {
       RequestItems: {
         'profilesSearchHelp': requests
+      }
+    }).then(data => {
+      if (data.UnprocessedItems.profilesSearchHelp) {
+        var count = data.UnprocessedItems.profilesSearchHelp.PutRequest.length;
+        var error = new Error('something is unprocessed: ' + count);
+        error.name = 'BatchWriteError';
+        return Promise.reject(error);
+      } else {
+        return Promise.resolve(data);
       }
     });
   });
