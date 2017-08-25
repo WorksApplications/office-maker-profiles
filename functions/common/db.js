@@ -74,8 +74,6 @@ function putProfile(originalProfile) {
       userId: profile.userId,
     };
   });
-  console.log('searchRecords', searchRecords);
-
   return dynamoUtil.put(documentClient, {
     TableName: "profiles",
     Item: dynamoUtil.emptyToNull(originalProfile)
@@ -92,8 +90,8 @@ function putProfile(originalProfile) {
         'profilesSearchHelp': requests
       }
     }).then(data => {
-      if (data.UnprocessedItems.profilesSearchHelp) {
-        var count = data.UnprocessedItems.profilesSearchHelp.PutRequest.length;
+      if (data.UnprocessedItems['profilesSearchHelp']) {
+        var count = data.UnprocessedItems['profilesSearchHelp'].length;
         var error = new Error('something is unprocessed: ' + count);
         error.name = 'BatchWriteError';
         return Promise.reject(error);
