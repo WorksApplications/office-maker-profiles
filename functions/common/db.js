@@ -22,21 +22,21 @@ function convertProfileBeforeSave(profile) {
   var normalizedName = searchHelper.normalize(profile.name);
   var normalizedNameArray = normalizedName.split(' ');
   profile.normalizedName = normalizedName;
-  profile.normalizedName1 = normalizedNameArray[0] || '???';
-  profile.normalizedName2 = normalizedNameArray[normalizedNameArray.length - 1] || '???';
+  profile.normalizedName1 = normalizedNameArray[0] || null;
+  profile.normalizedName2 = normalizedNameArray[normalizedNameArray.length - 1] || null;
 
   var normalizedRuby = searchHelper.normalize(profile.ruby);
   var normalizedRubyArray = normalizedRuby.split(' ');
   profile.normalizedRuby = normalizedRuby;
-  profile.normalizedRuby1 = normalizedRubyArray[0] || '???';
-  profile.normalizedRuby2 = normalizedRubyArray[normalizedRubyArray.length - 1] || '???';
+  profile.normalizedRuby1 = normalizedRubyArray[0] || null;
+  profile.normalizedRuby2 = normalizedRubyArray[normalizedRubyArray.length - 1] || null;
 
-  profile.employeeId = profile.employeeId || '???';
-  profile.mail = profile.mail || '???';
-  profile.normalizedMailBeforeAt = (profile.mail || '').split('@')[0] || '???';
-  profile.normalizedMailBeforeUnderscore = (profile.mail || '').split('_')[0] || '???';
-  profile.normalizedPost = searchHelper.normalize(profile.post) || '???';
-  profile.normalizedOrganization = searchHelper.normalize(profile.organization) || '???';
+  profile.employeeId = profile.employeeId || null;
+  profile.mail = profile.mail || null;
+  profile.normalizedMailBeforeAt = (profile.mail || '').split('@')[0] || null;
+  profile.normalizedMailBeforeUnderscore = (profile.mail || '').split('_')[0] || null;
+  profile.normalizedPost = searchHelper.normalize(profile.post) || null;
+  profile.normalizedOrganization = searchHelper.normalize(profile.organization) || null;
   return profile;
 }
 
@@ -64,7 +64,9 @@ function putProfile(originalProfile) {
     profile.normalizedMailBeforeAt,
     profile.normalizedMailBeforeUnderscore,
     profile.normalizedPost
-  ].forEach(key => {
+  ].filter(key => {
+    return !!key;
+  }).forEach(key => {
     keys[key] = true;
   });
 
