@@ -29,7 +29,7 @@ exports.handler = (event, context, callback) => {
     console.log(e);
     return null;
   }).then(user => {
-    if (user && user.role === 'admin') {
+    if (user && user.role.toLowerCase() === 'admin') {
       callback(null, {
         principalId: user.userId,
         policyDocument: {
@@ -42,7 +42,7 @@ exports.handler = (event, context, callback) => {
         },
         context: user
       });
-    } else if (user && (user.role === 'general' || user.role === 'guest')) {
+    } else if (user && (user.role.toLowerCase() === 'general' || user.role.toLowerCase() === 'guest')) {
       callback(null, {
         principalId: user.userId,
         policyDocument: {
