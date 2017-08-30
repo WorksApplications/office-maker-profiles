@@ -26,9 +26,10 @@ exports.handler = (event, context, callback) => {
   event.headers = event.headers || {};
   var token = (event.authorizationToken || '').split('Bearer ')[1];
   getSelf(token).catch(e => {
+    console.log(e);
     return null;
   }).then(user => {
-    if (user && user.role && user.role.toLowerCase() === 'admin') {
+    if (user && user.role === 'admin') {
       callback(null, {
         principalId: user.userId,
         policyDocument: {
@@ -41,7 +42,7 @@ exports.handler = (event, context, callback) => {
         },
         context: user
       });
-    } else if (user && user.role && user.role.toLowerCase() === 'general') {
+    } else if (user && (user.role === 'general' || user.role === 'guest')) {
       callback(null, {
         principalId: user.userId,
         policyDocument: {

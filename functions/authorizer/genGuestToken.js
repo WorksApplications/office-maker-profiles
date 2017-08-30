@@ -32,7 +32,7 @@ function sign(user, privateKey) {
   return new Promise((resolve, reject) => {
     jwt.sign(user, privateKey, {
       algorithm: 'RS256',
-      expiresIn: '60 days'
+      expiresIn: '180 days'
     }, function(e, token) {
       if (e) {
         reject(e);
