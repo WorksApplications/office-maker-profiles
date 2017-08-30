@@ -9,6 +9,7 @@ dynamodb_local
 mockAuth.js
 *.pem
 functions/authorizer/sourceIp.js
+functions/authorizer/guest.js
 functions/common/headers.js
 
 node_modules

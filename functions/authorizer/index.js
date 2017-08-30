@@ -17,16 +17,17 @@ function getSelf(token) {
         resolve(user);
       }
     });
-  }).catch(e => {
-    return Promise.resolve(null);
   });
 }
 
+exports.getSelf = getSelf; // for test
 exports.handler = (event, context, callback) => {
   console.log(event, context);
   event.headers = event.headers || {};
   var token = (event.authorizationToken || '').split('Bearer ')[1];
-  getSelf(token).then(user => {
+  getSelf(token).catch(e => {
+    return null;
+  }).then(user => {
     if (user && user.role === 'ADMIN') {
       callback(null, {
         principalId: user.userId,
