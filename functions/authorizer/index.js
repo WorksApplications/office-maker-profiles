@@ -28,7 +28,7 @@ exports.handler = (event, context, callback) => {
   getSelf(token).catch(e => {
     return null;
   }).then(user => {
-    if (user && user.role === 'ADMIN') {
+    if (user && user.role && user.role.toLowerCase() === 'admin') {
       callback(null, {
         principalId: user.userId,
         policyDocument: {
@@ -41,7 +41,7 @@ exports.handler = (event, context, callback) => {
         },
         context: user
       });
-    } else if (user && user.role === 'GENERAL') {
+    } else if (user && user.role && user.role.toLowerCase() === 'general') {
       callback(null, {
         principalId: user.userId,
         policyDocument: {
