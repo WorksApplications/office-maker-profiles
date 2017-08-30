@@ -42,16 +42,16 @@ function convertProfileBeforeSave(profile) {
 
 // function putProfile(profile) {
 //   profile = convertProfileBeforeSave(profile);
-//   profile = dynamoUtil.emptyToNull(profile);
+//   profile = dynamoUtil.deleteEmptyOrNull(profile);
 //   return dynamoUtil.put(documentClient, {
 //     TableName: "profiles",
-//     Item: dynamoUtil.emptyToNull(profile)
+//     Item: dynamoUtil.deleteEmptyOrNull(profile)
 //   });
 // }
 
 function putProfile(originalProfile) {
   var profile = convertProfileBeforeSave(originalProfile);
-  profile = dynamoUtil.emptyToNull(profile);
+  profile = dynamoUtil.deleteEmptyOrNull(profile);
 
   var keys = {};
   [
@@ -76,7 +76,7 @@ function putProfile(originalProfile) {
   });
   return dynamoUtil.put(documentClient, {
     TableName: "profiles",
-    Item: dynamoUtil.emptyToNull(originalProfile)
+    Item: dynamoUtil.deleteEmptyOrNull(originalProfile)
   }).then(_ => {
     var requests = searchRecords.map(record => {
       return {
