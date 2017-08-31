@@ -150,14 +150,23 @@ function deleteExtraFields(profile) {
   return profile;
 }
 
+function decodeQuery(q) {
+  try {
+    return decodeURIComponent(q);
+  } catch (e) {
+    return q;
+  }
+}
+
 function findProfileByQuery(q, limit, exclusiveStartKey) {
+  q = decodeQuery(q);
   var qs;
   if (q[0] === '"' && q[q.length - 1] === '"') {
     qs = [q.substring(1, q.length - 1)];
   } else {
     qs = searchHelper.normalizeSpace(q).split(' ');
   }
-  console.log('Queries:', qs);
+  log('Queries:', qs);
   var searches = qs.map(q => {
     var normalizedQ = searchHelper.normalize(q);
     return dynamoUtil.query(documentClient, {
