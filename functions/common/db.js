@@ -172,27 +172,50 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
       return Promise.resolve(data.Items);
     });
   });
+  return searchByAnd(searches, limit);
+}
 
+function searchByAnd(searches, limit) {
   var start = Date.now();
   return Promise.all(searches).then(recordsList => {
-    var dict = {};
     var count = {};
-    recordsList.forEach(records => {
+    recordsList.forEach((records, keyIndex) => {
       records.forEach(record => {
-        dict[record.userId] = true;
-        count[record.userId] = (count[record.userId] || 0) + 1;
+        if (keyIndex === 0 || count[record.userId] === keyIndex) {
+          count[record.userId] = keyIndex + 1;
+        }
       });
     });
-    var userIds = Object.keys(dict);
+    var userIds = Object.keys(count).filter(userId => count[userId] === recordsList.length);
     return findProfileByUserIds(userIds, limit).then(res => {
       log('got ' + res.profiles.length, 'took ' + (Date.now() - start) + 'ms');
-      res.profiles = res.profiles.sort((a, b) => {
-        return count[b.userId] - count[a.userId];
-      });
       return res;
     });
   });
 }
+
+// function searchByOr(searches, limit) {
+//   var start = Date.now();
+//   return Promise.all(searches).then(recordsList => {
+//     var dict = {};
+//     var count = {};
+//     recordsList.forEach(records => {
+//       records.forEach(record => {
+//         dict[record.userId] = true;
+//         count[record.userId] = (count[record.userId] || 0) + 1;
+//       });
+//     });
+//     var userIds = Object.keys(dict);
+//     return findProfileByUserIds(userIds, limit).then(res => {
+//       log('got ' + res.profiles.length, 'took ' + (Date.now() - start) + 'ms');
+//       res.profiles = res.profiles.sort((a, b) => {
+//         return count[b.userId] - count[a.userId];
+//       });
+//       return res;
+//     });
+//   });
+// }
+
 
 module.exports = {
   getProfile: getProfile,

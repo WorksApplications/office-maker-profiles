@@ -192,12 +192,12 @@ describe('Profile Lambda', () => {
         }
       }, {}).then(assertProfileLength(1));
     });
-    it('should support multiple queries at once', () => {
+    it('should support search by AND', () => {
       return handlerToPromise(profilesQuery.handler)({
         "queryStringParameters": {
-          "q": "やまだ やまもと"
+          "q": "太郎　やまだ"
         }
-      }, {}).then(assertProfileLength(2));
+      }, {}).then(assertProfileLength(1));
     });
     it('should support double-quotation', () => {
       return handlerToPromise(profilesQuery.handler)({
