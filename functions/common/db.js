@@ -157,6 +157,7 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
   } else {
     qs = searchHelper.normalizeSpace(q).split(' ');
   }
+  console.log('Queries:', qs);
   var searches = qs.map(q => {
     var normalizedQ = searchHelper.normalize(q);
     return dynamoUtil.query(documentClient, {
