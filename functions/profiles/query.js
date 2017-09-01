@@ -1,5 +1,6 @@
 var db = require('../common/db.js');
 var lambdaUtil = require('../common/lambda-util.js');
+var headers = require('../common/headers.js');
 var log = require('../common/log.js');
 
 exports.handler = (event, context, callback) => {
@@ -27,10 +28,10 @@ exports.handler = (event, context, callback) => {
     db.findProfileByQuery(q, limit, exclusiveStartKey).then(result => {
       callback(null, {
         statusCode: 200,
-        headers: {
+        headers: Object.assign({}, headers, {
           "Expires": expires,
           "Content-Type": "application/json"
-        },
+        }),
         body: result ? JSON.stringify(result) : ''
       });
     }).catch(e => {
