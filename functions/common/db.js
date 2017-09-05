@@ -12,7 +12,7 @@ function getProfile(userId) {
       userId: userId
     }
   }).then(data => {
-    return Promise.resolve(data.Item);
+    return data.Item;
   });
 }
 
@@ -85,7 +85,7 @@ function putKeysIntoSearchHelpTable(profile) {
       error.name = 'BatchWriteError';
       return Promise.reject(error);
     } else {
-      return Promise.resolve(data);
+      return data;
     }
   });
 }
@@ -165,11 +165,31 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
         ":key": normalizedQ
       }
     }).then(data => {
-      return Promise.resolve(data.Items);
+      return data.Items;
     });
   });
-  return searchByAnd(searches, limit);
+  return searchProfilesByAnd(searches, limit);
 }
+
+function searchProfilesByAnd(searches, limit) {
+  const start = Date.now();
+  return Promise.all(searches).then(recordsList => {
+    const count = {};
+    recordsList.forEach((records, keyIndex) => {
+      records.forEach(record => {
+        if (keyIndex === 0 || count[record.userId] === keyIndex) {
+          count[record.userId] = keyIndex + 1;
+        }
+      });
+    });
+    var userIds = Object.keys(count).filter(userId => count[userId] === recordsList.length);
+    return findProfileByUserIds(userIds, limit).then(res => {
+      log('got ' + res.profiles.length, 'took ' + (Date.now() - start) + 'ms');
+      return res;
+    });
+  });
+}
+
 
 function makeQueries(q) {
   q = decodeQuery(q);
@@ -188,7 +208,7 @@ function decodeQuery(q) {
   }
 }
 
-function findPostByQuery(q, limit, exclusiveStartKey) {
+function findPostByQuery(q) {
   const qs = makeQueries(q);
   const searches = qs.map(q => {
     const normalizedQ = searchHelper.normalize(q);
@@ -202,30 +222,29 @@ function findPostByQuery(q, limit, exclusiveStartKey) {
         ":key": normalizedQ
       }
     }).then(data => {
-      return Promise.resolve(data.Items);
+      return data.Items;
     });
   });
-  return searchByAnd(searches, limit);
+  return searchPostsByAnd(searches);
 }
 
-function searchByAnd(searches, limit) {
-  const start = Date.now();
+function searchPostsByAnd(searches) {
   return Promise.all(searches).then(recordsList => {
     const count = {};
     recordsList.forEach((records, keyIndex) => {
       records.forEach(record => {
-        if (keyIndex === 0 || count[record.userId] === keyIndex) {
-          count[record.userId] = keyIndex + 1;
+        if (keyIndex === 0 || count[record.name] === keyIndex) {
+          count[record.name] = keyIndex + 1;
         }
       });
     });
-    var userIds = Object.keys(count).filter(userId => count[userId] === recordsList.length);
-    return findProfileByUserIds(userIds, limit).then(res => {
-      log('got ' + res.profiles.length, 'took ' + (Date.now() - start) + 'ms');
-      return res;
+    var names = Object.keys(count).filter(name => count[name] === recordsList.length);
+    return names.map(name => {
+      name: name
     });
   });
 }
+
 
 module.exports = {
   getProfile: getProfile,

@@ -32,29 +32,6 @@ securityDefinitions:
       type: token
 
 paths:
-  # "/{proxy+}":
-  #   x-amazon-apigateway-any-method:
-  #     produces:
-  #     - application/json
-  #     parameters:
-  #     - name: proxy
-  #       in: path
-  #       required: true
-  #       type: string
-  #     responses: {}
-  #     x-amazon-apigateway-integration:
-  #       responses:
-  #         default:
-  #           statusCode: '200'
-  #       requestParameters:
-  #         integration.request.path.proxy: method.request.path.proxy
-  #       uri: http://petstore-demo-endpoint.execute-api.com/petstore/{proxy}
-  #       passthroughBehavior: when_no_match
-  #       httpMethod: ANY
-  #       cacheNamespace: rbftud
-  #       cacheKeyParameters:
-  #       - method.request.path.proxy
-  #       type: http_proxy
   /profiles:
     get:
       description: |
@@ -293,6 +270,63 @@ paths:
             statusCode: "200"
         uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:profiles_profiles_delete/invocations"
         type: aws_proxy
+
+  /posts:
+    get:
+      description: |
+        組織名の一覧を取得します。
+
+        クエリパラメータによって絞り込みを行うことができます。
+        `q` による検索は、スペース区切りで複数のキーワードを指定できます。
+      parameters:
+        - "$ref": "#/parameters/Authorization_opt"
+        - "$ref": "#/parameters/X-Forwarded-For"
+        - name: q
+          description: |
+            検索に利用するクエリ文字列です（1000文字以内）。
+          in: query
+          type: string
+        - name: limit
+          description: |
+            検索結果の最大件数を指定します。
+            最大（＝デフォルト）値は 100 です。
+          in: query
+          type: integer
+          default: 100
+          minimum: 1
+          maximum: 100
+        - name: exclusiveStartKey
+          description: |
+            前回の `lastEvaluatedKey` を付与し、ページネーションを行います。
+            このキーのデータ以降で、このキーを除くデータが返されます。
+          in: query
+          type: string
+      responses:
+        200:
+          description: 組織の検索結果を返します。
+          schema:
+            type: object
+            properties:
+              profiles:
+                type: array
+                items:
+                  $ref: "#/definitions/Post"
+              lastEvaluatedKey:
+                type: string
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+      security:
+        - CustomAuthorizer: []
+      x-amazon-apigateway-request-validator: params-only
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        responses:
+          default:
+            statusCode: "200"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:profiles_profiles_query/invocations"
+        type: aws_proxy
 definitions:
   Profile:
     type: object
@@ -323,6 +357,13 @@ definitions:
       mail:
         type: string
       workplace:
+        type: string
+  Post:
+    type: object
+    required:
+      - name
+    properties:
+      name:
         type: string
   Error:
     type: object
