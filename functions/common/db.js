@@ -150,6 +150,36 @@ function deleteExtraFields(profile) {
   return profile;
 }
 
+function findProfileByQuery(q, limit, exclusiveStartKey) {
+  const qs = makeQueries(q);
+  log('Queries:', qs);
+  var searches = qs.map(q => {
+    var normalizedQ = searchHelper.normalize(q);
+    return dynamoUtil.query(documentClient, {
+      TableName: 'profilesSearchHelp',
+      KeyConditionExpression: '#key = :key',
+      ExpressionAttributeNames: {
+        "#key": "key"
+      },
+      ExpressionAttributeValues: {
+        ":key": normalizedQ
+      }
+    }).then(data => {
+      return Promise.resolve(data.Items);
+    });
+  });
+  return searchByAnd(searches, limit);
+}
+
+function makeQueries(q) {
+  q = decodeQuery(q);
+  if (q[0] === '"' && q[q.length - 1] === '"') {
+    return [q.substring(1, q.length - 1)];
+  } else {
+    return searchHelper.normalizeSpace(q).split(' ');
+  }
+}
+
 function decodeQuery(q) {
   try {
     return decodeURIComponent(q);
@@ -158,19 +188,12 @@ function decodeQuery(q) {
   }
 }
 
-function findProfileByQuery(q, limit, exclusiveStartKey) {
-  q = decodeQuery(q);
-  var qs;
-  if (q[0] === '"' && q[q.length - 1] === '"') {
-    qs = [q.substring(1, q.length - 1)];
-  } else {
-    qs = searchHelper.normalizeSpace(q).split(' ');
-  }
-  log('Queries:', qs);
+function findPostByQuery(q, limit, exclusiveStartKey) {
+  const qs = makeQueries(q);
   var searches = qs.map(q => {
     var normalizedQ = searchHelper.normalize(q);
     return dynamoUtil.query(documentClient, {
-      TableName: 'profilesSearchHelp',
+      TableName: 'profilesPosts',
       KeyConditionExpression: '#key = :key',
       ExpressionAttributeNames: {
         "#key": "key"
@@ -204,34 +227,12 @@ function searchByAnd(searches, limit) {
   });
 }
 
-// function searchByOr(searches, limit) {
-//   var start = Date.now();
-//   return Promise.all(searches).then(recordsList => {
-//     var dict = {};
-//     var count = {};
-//     recordsList.forEach(records => {
-//       records.forEach(record => {
-//         dict[record.userId] = true;
-//         count[record.userId] = (count[record.userId] || 0) + 1;
-//       });
-//     });
-//     var userIds = Object.keys(dict);
-//     return findProfileByUserIds(userIds, limit).then(res => {
-//       log('got ' + res.profiles.length, 'took ' + (Date.now() - start) + 'ms');
-//       res.profiles = res.profiles.sort((a, b) => {
-//         return count[b.userId] - count[a.userId];
-//       });
-//       return res;
-//     });
-//   });
-// }
-
-
 module.exports = {
   getProfile: getProfile,
   putProfile: putProfile,
   patchProfile: patchProfile,
   deleteProfile: deleteProfile,
   findProfileByUserIds: findProfileByUserIds,
-  findProfileByQuery: findProfileByQuery
+  findProfileByQuery: findProfileByQuery,
+  findPostByQuery: findPostByQuery
 };

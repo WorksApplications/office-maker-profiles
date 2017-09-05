@@ -1,0 +1,15 @@
+Properties:
+  TableName: profilesPosts
+  AttributeDefinitions:
+    - AttributeName: key
+      AttributeType: S
+    - AttributeName: post
+      AttributeType: S
+  KeySchema:
+    - AttributeName: key
+      KeyType: HASH
+    - AttributeName: post
+      KeyType: RANGE
+  ProvisionedThroughput:
+    ReadCapacityUnits: 1
+    WriteCapacityUnits: 1

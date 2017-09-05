@@ -24,6 +24,7 @@ var port = 4569;
 // temporary
 var tableDefYaml = fs.readFileSync(__dirname + '/test-table.yml', 'utf8');
 var searchTableDefYaml = fs.readFileSync(__dirname + '/search-table.yml', 'utf8');
+var postsTableDefYaml = fs.readFileSync(__dirname + '/posts-table.yml', 'utf8');
 
 describe('Profile Lambda', () => {
   var dbProcess = null;
@@ -38,6 +39,9 @@ describe('Profile Lambda', () => {
         return dynamoUtil.createTable(dynamodb, tableDef);
       }).then(_ => {
         var tableDef = yaml.safeLoad(searchTableDefYaml).Properties;
+        return dynamoUtil.createTable(dynamodb, tableDef);
+      }).then(_ => {
+        var tableDef = yaml.safeLoad(postsTableDefYaml).Properties;
         return dynamoUtil.createTable(dynamodb, tableDef);
       });
     });
