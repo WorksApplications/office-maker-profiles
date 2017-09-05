@@ -325,7 +325,7 @@ paths:
         responses:
           default:
             statusCode: "200"
-        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:profiles_profiles_query/invocations"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:profiles_posts_query/invocations"
         type: aws_proxy
 definitions:
   Profile:

@@ -153,6 +153,12 @@ describe('Profile Service', function() {
       return send(mockAuth.admin, 'DELETE', url).then(assertStatus(200));
     });
   });
+  describe('GET /posts?q=', () => {
+    it('returns 401 if not authenticated', () => {
+      var url = serviceRoot + '/profiles?q=not_exist';
+      return send(null, 'GET', url).then(assertStatus(401));
+    });
+  });
 });
 
 function send(authorization, method, url, data) {

@@ -100,6 +100,15 @@ Resources:
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
 
+  PostsQuery:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: profiles_posts_query
+      Handler: posts/query.handler
+      Runtime: nodejs6.10
+      Policies: AmazonDynamoDBReadOnlyAccess
+      Timeout: 30
+
   Api:
     Type: AWS::Serverless::Api
     Properties:
