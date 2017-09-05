@@ -261,7 +261,11 @@ function findPostByQuery(q) {
       return data.Items;
     });
   });
-  return searchPostsByAnd(searches);
+  return searchPostsByAnd(searches).then(posts => {
+    return {
+      posts: posts
+    };
+  });
 }
 
 function searchPostsByAnd(searches) {

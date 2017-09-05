@@ -15,6 +15,7 @@ var profilesGet = require('../functions/profiles/get.js');
 var profilesPut = require('../functions/profiles/put.js');
 var profilesDelete = require('../functions/profiles/delete.js');
 var profilesQuery = require('../functions/profiles/query.js');
+var postsQuery = require('../functions/posts/query.js');
 
 var dynamodbLocalPath = __dirname + '/../dynamodb_local';
 var port = 4569;
@@ -77,6 +78,15 @@ describe('Profile Lambda', () => {
       mail: 'yamada_s@example.com',
       workplace: null // be sure to allow empty string
     }));
+  });
+  describe('GET /posts', () => {
+    it('should search profiles by q', () => {
+      return handlerToPromise(postsQuery.handler)({
+        "queryStringParameters": {
+          "q": "Sales"
+        }
+      }, {}).then(assertPostLength(1));
+    });
   });
   describe('GET /profiles', () => {
     it('should search profiles by userId', () => {
@@ -286,6 +296,19 @@ function assertProfileLength(expect) {
     var profiles = JSON.parse(result.body).profiles;
     if (profiles.length !== expect) {
       throw `Expected profile length ${expect} but got ${profiles.length}`;
+    }
+    return Promise.resolve(result);
+  };
+}
+
+function assertPostLength(expect) {
+  return result => {
+    if (result.statusCode !== 200) {
+      throw `Expected statusCode 200 but got ${result.statusCode}: ${JSON.stringify(result)}`;
+    }
+    var posts = JSON.parse(result.body).posts;
+    if (posts.length !== expect) {
+      throw `Expected profile length ${expect} but got ${posts.length}`;
     }
     return Promise.resolve(result);
   };
