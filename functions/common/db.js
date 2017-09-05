@@ -77,9 +77,12 @@ function putKeysIntoSearchHelpTable(profile) {
 }
 
 function putKeysIntoPostTable(postName) {
-  const keys = searchHelper.normalize(postName).split(' ').filter(key => {
+  let keys = searchHelper.normalize(postName).split(' ').filter(key => {
     return !key.endsWith('.');
+  }).filter(key => {
+    return key.length > 1;
   });
+  keys = Array.from(new Set(keys));
   const nodes = postName.split('\n');
   const name1 = nodes[0] ? nodes[0] : undefined;
   const name2 = nodes[1] ? nodes[1] : undefined;
@@ -102,6 +105,7 @@ function putKeysIntoPostTable(postName) {
       }
     };
   });
+  // console.log(JSON.stringify(requests, null, 2));
   return strictBatchWrite('profilesPosts', requests);
 }
 
@@ -131,7 +135,7 @@ function putProfile(profile) {
   });
 }
 
-//TODO
+//TODO this is the same as PUT for now
 const patchProfile = function(profile) {
   profile = convertProfileBeforeSave(profile);
   profile = dynamoUtil.deleteEmptyOrNull(profile);
