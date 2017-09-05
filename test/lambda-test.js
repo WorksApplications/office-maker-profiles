@@ -9,7 +9,6 @@ var options = require('../functions/common/db-options.js');
 var dynamodb = new AWS.DynamoDB(options);
 var documentClient = new AWS.DynamoDB.DocumentClient(options);
 var yaml = require('js-yaml');
-// var templateOutYml = yaml.safeLoad(fs.readFileSync('./template_out.yml', 'utf8'));
 var assert = require('assert');
 
 var profilesGet = require('../functions/profiles/get.js');
@@ -21,7 +20,7 @@ var dynamodbLocalPath = __dirname + '/../dynamodb_local';
 var port = 4569;
 
 
-// temporary
+// TODO: share with SAM template
 var tableDefYaml = fs.readFileSync(__dirname + '/test-table.yml', 'utf8');
 var searchTableDefYaml = fs.readFileSync(__dirname + '/search-table.yml', 'utf8');
 var postsTableDefYaml = fs.readFileSync(__dirname + '/posts-table.yml', 'utf8');

@@ -73,7 +73,39 @@ function putKeysIntoSearchHelpTable(profile) {
       }
     };
   });
-  const tableName = 'profilesSearchHelp';
+  return strictBatchWrite('profilesSearchHelp', requests);
+}
+
+function putKeysIntoPostTable(postName) {
+  const keys = searchHelper.normalize(postName).split(' ').filter(key => {
+    return !key.endsWith('.');
+  });
+  const nodes = postName.split('\n');
+  const name1 = nodes[0] ? nodes[0] : undefined;
+  const name2 = nodes[1] ? nodes[1] : undefined;
+  const name3 = nodes[2] ? nodes[2] : undefined;
+  const name4 = nodes[3] ? nodes[3] : undefined;
+  const searchRecords = keys.map(key => {
+    return {
+      key: key,
+      name: postName,
+      name1: name1,
+      name2: name2,
+      name3: name3,
+      name4: name4
+    };
+  });
+  const requests = searchRecords.map(record => {
+    return {
+      PutRequest: {
+        Item: record
+      }
+    };
+  });
+  return strictBatchWrite('profilesPosts', requests);
+}
+
+function strictBatchWrite(tableName, requests) {
   return dynamoUtil.batchWrite(documentClient, {
     RequestItems: {
       [tableName]: requests
@@ -249,6 +281,7 @@ function searchPostsByAnd(searches) {
 module.exports = {
   getProfile: getProfile,
   putProfileAndMakeIndex: putProfileAndMakeIndex,
+  putKeysIntoPostTable: putKeysIntoPostTable,
   patchProfile: patchProfile,
   deleteProfile: deleteProfile,
   findProfileByUserIds: findProfileByUserIds,
