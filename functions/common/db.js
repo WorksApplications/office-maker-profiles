@@ -53,38 +53,43 @@ function makeKeys(profile) {
 }
 
 function putProfileAndMakeIndex(profile) {
-
   return putProfile(profile).then(_ => {
     profile = dynamoUtil.deleteEmptyOrNull(profile);
-    const searchRecords = makeKeys(profile).map(key => {
-      return {
-        key: key,
-        userId: profile.userId,
-      };
-    });
-    const requests = searchRecords.map(record => {
-      return {
-        PutRequest: {
-          Item: record
-        }
-      };
-    });
-    return dynamoUtil.batchWrite(documentClient, {
-      RequestItems: {
-        'profilesSearchHelp': requests
-      }
-    }).then(data => {
-      if (data.UnprocessedItems['profilesSearchHelp']) {
-        const count = data.UnprocessedItems['profilesSearchHelp'].length;
-        const error = new Error('something is unprocessed: ' + count);
-        error.name = 'BatchWriteError';
-        return Promise.reject(error);
-      } else {
-        return Promise.resolve(data);
-      }
-    });
+    return putKeysIntoSearchHelpTable(profile);
   });
 }
+
+function putKeysIntoSearchHelpTable(profile) {
+  const searchRecords = makeKeys(profile).map(key => {
+    return {
+      key: key,
+      userId: profile.userId,
+    };
+  });
+  const requests = searchRecords.map(record => {
+    return {
+      PutRequest: {
+        Item: record
+      }
+    };
+  });
+  const tableName = 'profilesSearchHelp';
+  return dynamoUtil.batchWrite(documentClient, {
+    RequestItems: {
+      [tableName]: requests
+    }
+  }).then(data => {
+    if (data.UnprocessedItems[tableName]) {
+      const count = data.UnprocessedItems[tableName].length;
+      const error = new Error('something is unprocessed: ' + count);
+      error.name = 'BatchWriteError';
+      return Promise.reject(error);
+    } else {
+      return Promise.resolve(data);
+    }
+  });
+}
+
 
 function putProfile(profile) {
   profile = dynamoUtil.deleteEmptyOrNull(profile);
