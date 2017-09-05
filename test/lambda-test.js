@@ -207,71 +207,6 @@ describe('Profile Lambda', () => {
       }, {}).then(assertProfileLength(0));
     });
   });
-  describe('GET /profiles (large)', () => {
-    // // var count = 3000;
-    // var totalCount = 120; //
-    // before(function() {
-    //   this.timeout(30 * 1000);
-    //   return Array.from(Array(totalCount).keys()).reduce((p, i) => {
-    //     return p.then(_ => {
-    //       var mail = `user${i}@example.com`;
-    //       return db.putProfile({
-    //         userId: mail,
-    //         picture: null,
-    //         name: '竹中 洋子',
-    //         ruby: 'たけなか ようこ',
-    //         employeeId: '1234',
-    //         organization: 'Example Co., Ltd.',
-    //         post: 'Tech',
-    //         rank: 'Manager',
-    //         cellPhone: '080-XXX-4567',
-    //         extensionPhone: 'XXXXX',
-    //         mail: mail,
-    //         workplace: null
-    //       });
-    //     });
-    //   }, Promise.resolve());
-    // });
-    // it('should search', () => {
-    //   return handlerToPromise(profilesQuery.handler)({
-    //     "queryStringParameters": {
-    //       "q": "竹中"
-    //     }
-    //   }, {}).then(assertStatus(200)).then(res => {
-    //     var profiles = JSON.parse(res.body).profiles;
-    //     // console.log('found', profiles.length);
-    //     return Promise.resolve();
-    //   });
-    // });
-    // it('should work with limit', function() {
-    //   this.timeout(30 * 1000);
-    //
-    //   function recursivelyGetAll(previous, exclusiveStartKey) {
-    //     previous = previous || [];
-    //     return handlerToPromise(profilesQuery.handler)({
-    //       "queryStringParameters": {
-    //         "q": "竹中",
-    //         "limit": 100,
-    //         "exclusiveStartKey": exclusiveStartKey
-    //       }
-    //     }, {}).then(res => {
-    //       var profiles = JSON.parse(res.body).profiles;
-    //       var lastEvaluatedKey = JSON.parse(res.body).lastEvaluatedKey;
-    //       if (lastEvaluatedKey) {
-    //         return recursivelyGetAll(previous.concat(profiles), lastEvaluatedKey);
-    //       } else {
-    //         return Promise.resolve(previous.concat(profiles));
-    //       }
-    //     });
-    //   }
-    //   return recursivelyGetAll().then(profiles => {
-    //     if (profiles.length !== totalCount) {
-    //       return Promise.reject('Unexpected profiles count: ' + profiles.length);
-    //     }
-    //     return Promise.resolve();
-    //   });
-    // });
-  });
   describe('GET /profiles/{userId}', () => {
     it('returns 200 if profile exists', () => {
       return handlerToPromise(profilesGet.handler)({
@@ -444,3 +379,18 @@ function runLocalDynamo(dynamodbLocalPath, port) {
     resolve(p);
   });
 }
+
+// function recursivelyGetAll(lambdaEvent, previous) {
+//   previous = previous || [];
+//   return handlerToPromise(profilesQuery.handler)(lambdaEvent, {}).then(res => {
+//     var profiles = JSON.parse(res.body).profiles;
+//     var lastEvaluatedKey = JSON.parse(res.body).lastEvaluatedKey;
+//     if (lastEvaluatedKey) {
+//       var newEvent = Object.assign({}, lambdaEvent);
+//       newEvent.queryStringParameters.exclusiveStartKey = lastEvaluatedKey;
+//       return recursivelyGetAll(newEvent, previous.concat(profiles));
+//     } else {
+//       return Promise.resolve(previous.concat(profiles));
+//     }
+//   });
+// }
