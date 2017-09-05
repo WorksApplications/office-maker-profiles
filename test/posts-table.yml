@@ -3,12 +3,12 @@ Properties:
   AttributeDefinitions:
     - AttributeName: key
       AttributeType: S
-    - AttributeName: post
+    - AttributeName: name
       AttributeType: S
   KeySchema:
     - AttributeName: key
       KeyType: HASH
-    - AttributeName: post
+    - AttributeName: name
       KeyType: RANGE
   ProvisionedThroughput:
     ReadCapacityUnits: 1

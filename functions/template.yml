@@ -34,6 +34,24 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 
+  ProfilesPostsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: profilesPosts
+      AttributeDefinitions:
+        - AttributeName: key
+          AttributeType: S
+        - AttributeName: name
+          AttributeType: S
+      KeySchema:
+        - AttributeName: key
+          KeyType: HASH
+        - AttributeName: name
+          KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:

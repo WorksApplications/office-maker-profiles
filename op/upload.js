@@ -104,6 +104,9 @@ function spawnCommand(cwd, command, args) {
 }
 
 function rmdir(path) {
+  if (!fs.existsSync(path)) {
+    return Promise.resolve();
+  }
   return new Promise((resolve, reject) => {
     childProcess.exec('rm -r ' + path, {
       cwd: '.'
