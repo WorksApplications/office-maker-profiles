@@ -51,7 +51,7 @@ describe('Profile Lambda', () => {
   });
 
   beforeEach(() => {
-    return db.putProfile({
+    return db.putProfileAndMakeIndex({
       userId: 'yamada_t@example.com',
       picture: null,
       name: '山田 太郎',
@@ -64,7 +64,7 @@ describe('Profile Lambda', () => {
       extensionPhone: 'XXXXX',
       mail: 'yamada_t@example.com',
       workplace: null
-    }).then(_ => db.putProfile({
+    }).then(_ => db.putProfileAndMakeIndex({
       userId: 'yamada_s@example.com',
       picture: null, // be sure to allow empty string
       name: '山田 Saburo',

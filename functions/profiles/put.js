@@ -3,7 +3,7 @@ var lambdaUtil = require('../common/lambda-util.js');
 
 exports.handler = (event, context, callback) => {
   var profile = JSON.parse(event.body);
-  db.putProfile(profile).then(_ => {
+  db.putProfileAndMakeIndex(profile).then(_ => {
     lambdaUtil.send(callback, 200);
   }).catch(e => {
     // console.log(e.stack)

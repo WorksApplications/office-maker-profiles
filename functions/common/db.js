@@ -1,9 +1,9 @@
-var AWS = require('aws-sdk');
-var options = require('./db-options.js');
-var documentClient = new AWS.DynamoDB.DocumentClient(options);
-var dynamoUtil = require('./dynamo-util.js');
-var searchHelper = require('./search-helper.js');
-var log = require('./log.js');
+const AWS = require('aws-sdk');
+const options = require('./db-options.js');
+const documentClient = new AWS.DynamoDB.DocumentClient(options);
+const dynamoUtil = require('./dynamo-util.js');
+const searchHelper = require('./search-helper.js');
+const log = require('./log.js');
 
 function getProfile(userId) {
   return dynamoUtil.get(documentClient, {
@@ -16,71 +16,53 @@ function getProfile(userId) {
   });
 }
 
-function convertProfileBeforeSave(profile) {
-  profile = Object.assign({}, profile);
+function makeKeys(profile) {
+  const normalizedName = searchHelper.normalize(profile.name);
+  const normalizedNameArray = normalizedName.split(' ');
+  const normalizedName1 = normalizedNameArray[0] || null;
+  const normalizedName2 = normalizedNameArray[normalizedNameArray.length - 1] || null;
 
-  var normalizedName = searchHelper.normalize(profile.name);
-  var normalizedNameArray = normalizedName.split(' ');
-  profile.normalizedName = normalizedName;
-  profile.normalizedName1 = normalizedNameArray[0] || null;
-  profile.normalizedName2 = normalizedNameArray[normalizedNameArray.length - 1] || null;
+  const normalizedRuby = searchHelper.normalize(profile.ruby);
+  const normalizedRubyArray = normalizedRuby.split(' ');
+  const normalizedRuby1 = normalizedRubyArray[0] || null;
+  const normalizedRuby2 = normalizedRubyArray[normalizedRubyArray.length - 1] || null;
 
-  var normalizedRuby = searchHelper.normalize(profile.ruby);
-  var normalizedRubyArray = normalizedRuby.split(' ');
-  profile.normalizedRuby = normalizedRuby;
-  profile.normalizedRuby1 = normalizedRubyArray[0] || null;
-  profile.normalizedRuby2 = normalizedRubyArray[normalizedRubyArray.length - 1] || null;
+  const employeeId = profile.employeeId || null;
+  const mail = profile.mail || null;
+  const normalizedMailBeforeAt = (mail || '').split('@')[0] || null;
+  const normalizedMailBeforeUnderscore = (mail || '').split('_')[0] || null;
+  const normalizedPost = searchHelper.normalize(profile.post) || null;
+  const normalizedOrganization = searchHelper.normalize(profile.organization) || null;
 
-  profile.employeeId = profile.employeeId || null;
-  profile.mail = profile.mail || null;
-  profile.normalizedMailBeforeAt = (profile.mail || '').split('@')[0] || null;
-  profile.normalizedMailBeforeUnderscore = (profile.mail || '').split('_')[0] || null;
-  profile.normalizedPost = searchHelper.normalize(profile.post) || null;
-  profile.normalizedOrganization = searchHelper.normalize(profile.organization) || null;
-  return profile;
-}
-
-// function putProfile(profile) {
-//   profile = convertProfileBeforeSave(profile);
-//   profile = dynamoUtil.deleteEmptyOrNull(profile);
-//   return dynamoUtil.put(documentClient, {
-//     TableName: "profiles",
-//     Item: dynamoUtil.deleteEmptyOrNull(profile)
-//   });
-// }
-
-function putProfile(originalProfile) {
-  var profile = convertProfileBeforeSave(originalProfile);
-  profile = dynamoUtil.deleteEmptyOrNull(profile);
-
-  var keys = {};
-  [
-    profile.normalizedName1,
-    profile.normalizedName2,
-    profile.normalizedRuby1,
-    profile.normalizedRuby2,
-    profile.employeeId,
-    profile.mail,
-    profile.normalizedMailBeforeAt,
-    profile.normalizedMailBeforeUnderscore,
-    profile.normalizedPost
+  const keys = {};
+  [normalizedName1,
+    normalizedName2,
+    normalizedRuby1,
+    normalizedRuby2,
+    employeeId,
+    mail,
+    normalizedMailBeforeAt,
+    normalizedMailBeforeUnderscore,
+    normalizedPost
   ].filter(key => {
     return !!key;
   }).forEach(key => {
     keys[key] = true;
   });
+  return Object.keys(keys);
+}
 
-  var searchRecords = Object.keys(keys).map(key => {
-    return {
-      key: key,
-      userId: profile.userId,
-    };
-  });
-  return dynamoUtil.put(documentClient, {
-    TableName: "profiles",
-    Item: dynamoUtil.deleteEmptyOrNull(originalProfile)
-  }).then(_ => {
-    var requests = searchRecords.map(record => {
+function putProfileAndMakeIndex(profile) {
+
+  return putProfile(profile).then(_ => {
+    profile = dynamoUtil.deleteEmptyOrNull(profile);
+    const searchRecords = makeKeys(profile).map(key => {
+      return {
+        key: key,
+        userId: profile.userId,
+      };
+    });
+    const requests = searchRecords.map(record => {
       return {
         PutRequest: {
           Item: record
@@ -93,8 +75,8 @@ function putProfile(originalProfile) {
       }
     }).then(data => {
       if (data.UnprocessedItems['profilesSearchHelp']) {
-        var count = data.UnprocessedItems['profilesSearchHelp'].length;
-        var error = new Error('something is unprocessed: ' + count);
+        const count = data.UnprocessedItems['profilesSearchHelp'].length;
+        const error = new Error('something is unprocessed: ' + count);
         error.name = 'BatchWriteError';
         return Promise.reject(error);
       } else {
@@ -104,7 +86,20 @@ function putProfile(originalProfile) {
   });
 }
 
-var patchProfile = putProfile;
+function putProfile(profile) {
+  profile = dynamoUtil.deleteEmptyOrNull(profile);
+  return dynamoUtil.put(documentClient, {
+    TableName: "profiles",
+    Item: dynamoUtil.deleteEmptyOrNull(profile)
+  });
+}
+
+//TODO
+const patchProfile = function(profile) {
+  profile = convertProfileBeforeSave(profile);
+  profile = dynamoUtil.deleteEmptyOrNull(profile);
+  return putProfile(profile);
+};
 
 function deleteProfile(userId) {
   return dynamoUtil.delete(documentClient, {
@@ -153,8 +148,8 @@ function deleteExtraFields(profile) {
 function findProfileByQuery(q, limit, exclusiveStartKey) {
   const qs = makeQueries(q);
   log('Queries:', qs);
-  var searches = qs.map(q => {
-    var normalizedQ = searchHelper.normalize(q);
+  const searches = qs.map(q => {
+    const normalizedQ = searchHelper.normalize(q);
     return dynamoUtil.query(documentClient, {
       TableName: 'profilesSearchHelp',
       KeyConditionExpression: '#key = :key',
@@ -190,8 +185,8 @@ function decodeQuery(q) {
 
 function findPostByQuery(q, limit, exclusiveStartKey) {
   const qs = makeQueries(q);
-  var searches = qs.map(q => {
-    var normalizedQ = searchHelper.normalize(q);
+  const searches = qs.map(q => {
+    const normalizedQ = searchHelper.normalize(q);
     return dynamoUtil.query(documentClient, {
       TableName: 'profilesPosts',
       KeyConditionExpression: '#key = :key',
@@ -209,9 +204,9 @@ function findPostByQuery(q, limit, exclusiveStartKey) {
 }
 
 function searchByAnd(searches, limit) {
-  var start = Date.now();
+  const start = Date.now();
   return Promise.all(searches).then(recordsList => {
-    var count = {};
+    const count = {};
     recordsList.forEach((records, keyIndex) => {
       records.forEach(record => {
         if (keyIndex === 0 || count[record.userId] === keyIndex) {
@@ -229,7 +224,7 @@ function searchByAnd(searches, limit) {
 
 module.exports = {
   getProfile: getProfile,
-  putProfile: putProfile,
+  putProfileAndMakeIndex: putProfileAndMakeIndex,
   patchProfile: patchProfile,
   deleteProfile: deleteProfile,
   findProfileByUserIds: findProfileByUserIds,
