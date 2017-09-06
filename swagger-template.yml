@@ -125,6 +125,34 @@ paths:
             statusCode: "200"
         uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:profiles_profiles_query/invocations"
         type: aws_proxy
+    options:
+      consumes:
+        - application/json
+      responses:
+        '200':
+          description: 200 response
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Credentials:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Pragma,Cache-Control,If-Modified-Since'"
+              method.response.header.Access-Control-Allow-Origin: "__ACCESS_CONTROL_ALLOW_ORIGIN__"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        passthroughBehavior: when_no_match
+        type: mock
 
   /profiles/{userId}:
     get:
@@ -270,6 +298,42 @@ paths:
             statusCode: "200"
         uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:profiles_profiles_delete/invocations"
         type: aws_proxy
+    options:
+      consumes:
+        - application/json
+      parameters:
+        - name: userId
+          description: ""
+          in: path
+          type: string
+          required: true
+        - "$ref": "#/parameters/Authorization_opt"
+        - "$ref": "#/parameters/X-Forwarded-For"
+      responses:
+        '200':
+          description: 200 response
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Credentials:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,PUT,PATCH,DELETE,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Pragma,Cache-Control,If-Modified-Since'"
+              method.response.header.Access-Control-Allow-Origin: "__ACCESS_CONTROL_ALLOW_ORIGIN__"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        passthroughBehavior: when_no_match
+        type: mock
 
   /posts:
     get:
@@ -327,6 +391,35 @@ paths:
             statusCode: "200"
         uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:profiles_posts_query/invocations"
         type: aws_proxy
+    options:
+      consumes:
+        - application/json
+      responses:
+        '200':
+          description: 200 response
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Credentials:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Pragma,Cache-Control,If-Modified-Since'"
+              method.response.header.Access-Control-Allow-Origin: "__ACCESS_CONTROL_ALLOW_ORIGIN__"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        passthroughBehavior: when_no_match
+        type: mock
+
 definitions:
   Profile:
     type: object

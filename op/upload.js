@@ -18,7 +18,7 @@ var outputTemplateFile = Path.resolve('./functions/template_out.yml');
 var funcDir = Path.resolve('./functions');
 
 rmdir(funcDir + '/node_modules').then(_ => {
-  return generateSwaggerYml(project.accountId, project.region).then(_ => {
+  return generateSwaggerYml(project.accountId, project.region, project.accessControlAllowOrigin).then(_ => {
     return npmInstall(funcDir, true).then(_ => {
       return cloudFormationPackage(funcDir, templateFile, outputTemplateFile, project.s3Bucket).then(_ => {
         var s = fs.readFileSync(outputTemplateFile, 'utf8');
@@ -36,11 +36,12 @@ rmdir(funcDir + '/node_modules').then(_ => {
   process.exit(1);
 });
 
-function generateSwaggerYml(accountId, region) {
+function generateSwaggerYml(accountId, region, accessControlAllowOrigin) {
   if (fs.existsSync('./swagger-template.yml')) {
     var replacedText = fs.readFileSync('./swagger-template.yml', 'utf8')
       .replace(/__ACCOUNT_ID__/g, accountId)
-      .replace(/__REGION__/g, region);
+      .replace(/__REGION__/g, region)
+      .replace(/__ACCESS_CONTROL_ALLOW_ORIGIN__/g, accessControlAllowOrigin);
     fs.writeFileSync('./swagger.yml', replacedText);
   }
   return Promise.resolve();
