@@ -52,6 +52,13 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 
+  Scaledown:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: profiles_operation_scaledown
+      Handler: operation/scaledown.handler
+      Runtime: nodejs6.10
+
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
