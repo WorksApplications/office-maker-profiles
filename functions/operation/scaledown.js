@@ -31,13 +31,13 @@ exports.handler = () => {
 };
 
 function putAndDelete(tableName, putItem, deleteKey) {
-  return dynamoUtil.put({
+  return dynamoUtil.put(documentClient, {
     TableName: tableName,
     Item: putItem,
   }).catch(e => {
     console.log(e);
   }).then(_ => {
-    return dynamoUtil.delete({
+    return dynamoUtil.delete(documentClient, {
       TableName: tableName,
       Key: deleteKey
     });
