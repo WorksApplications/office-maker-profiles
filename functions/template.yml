@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Profile Service
 Resources:
+
+  # DynamoDB Tables
   ProfilesTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -52,12 +54,14 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 
+  # Lambda Functions
   Scaledown:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: profiles_operation_scaledown
       Handler: operation/scaledown.handler
       Runtime: nodejs6.10
+      Policies: AmazonDynamoDBFullAccess
 
   Authorizer:
     Type: AWS::Serverless::Function
@@ -116,6 +120,7 @@ Resources:
       Policies: AmazonDynamoDBReadOnlyAccess
       Timeout: 30
 
+  # API Gateway
   Api:
     Type: AWS::Serverless::Api
     Properties:
@@ -124,7 +129,14 @@ Resources:
       Variables:
         LambdaAlias: DEV
 
-  # https://github.com/awslabs/serverless-application-model/issues/59
+  # Permissions
+  ScaledownPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref Scaledown
+      Principal: events.amazonaws.com
+
   ProfilesQueryPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
@@ -167,6 +179,7 @@ Resources:
       FunctionName: !Ref Authorizer
       Principal: apigateway.amazonaws.com
 
+  # Cloudwatch Events
   ScaledownEvent:
     Type: "AWS::Events::Rule"
     Properties:
