@@ -1,15 +1,20 @@
-dest/*.zip
-project.json
-env.json
-*.sh
-template_out.yml
-swagger.yml
-dynamodb_local
-
+# secret
+config.json
 mockAuth.js
 *.pem
 functions/authorizer/sourceIp.js
 functions/authorizer/guest.js
 functions/common/headers.js
 
+
+# node
 node_modules
+
+
+# work
+tmp
+
+
+# debug
+test.sh
+dynamodb_local

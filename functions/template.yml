@@ -125,7 +125,7 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: dev
-      DefinitionUri: ../swagger.yml
+      DefinitionUri: ../tmp/swagger.yml
       Variables:
         LambdaAlias: DEV
 

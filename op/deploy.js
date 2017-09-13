@@ -1,28 +1,29 @@
-var fs = require('fs');
-var childProcess = require('child_process');
-var Path = require('path');
-var AWS = require('aws-sdk');
-var yaml = require('js-yaml');
+const fs = require('fs');
+const childProcess = require('child_process');
+const Path = require('path');
+const AWS = require('aws-sdk');
+const yaml = require('js-yaml');
 
-var project = JSON.parse(fs.readFileSync('./project.json', 'utf8'));
+const project = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
 
-var cloudformation = new AWS.CloudFormation({
+const cloudformation = new AWS.CloudFormation({
   region: project.region
 });
-var s3 = new AWS.S3({
+const s3 = new AWS.S3({
   region: project.region
 });
 
-var templateFile = Path.resolve('./functions/template.yml');
-var outputTemplateFile = Path.resolve('./functions/template_out.yml');
-var funcDir = Path.resolve('./functions');
+const funcDir = Path.resolve('./functions');
+const tmpDir = Path.resolve('./tmp');
+const templateFile = Path.resolve(funcDir, 'template.yml');
+const outputTemplateFile = Path.resolve(tmpDir, 'template.yml');
+const swaggerTemplateFile = 'swagger.yml'
+const swaggerFile = Path.resolve(tmpDir, 'swagger.yml');
 
 rmdir(funcDir + '/node_modules').then(_ => {
   return generateSwaggerYml(project.accountId, project.region, project.accessControlAllowOrigin).then(_ => {
     return npmInstall(funcDir, true).then(_ => {
       return cloudFormationPackage(funcDir, templateFile, outputTemplateFile, project.s3Bucket).then(_ => {
-        var s = fs.readFileSync(outputTemplateFile, 'utf8');
-        fs.writeFileSync(outputTemplateFile, s);
         return cloudFormationDeploy(funcDir, outputTemplateFile, project.stackName);
       });
     });
@@ -37,12 +38,12 @@ rmdir(funcDir + '/node_modules').then(_ => {
 });
 
 function generateSwaggerYml(accountId, region, accessControlAllowOrigin) {
-  if (fs.existsSync('./swagger-template.yml')) {
-    var replacedText = fs.readFileSync('./swagger-template.yml', 'utf8')
+  if (fs.existsSync(swaggerTemplateFile)) {
+    const replacedText = fs.readFileSync(swaggerTemplateFile, 'utf8')
       .replace(/__ACCOUNT_ID__/g, accountId)
       .replace(/__REGION__/g, region)
       .replace(/__ACCESS_CONTROL_ALLOW_ORIGIN__/g, accessControlAllowOrigin);
-    fs.writeFileSync('./swagger.yml', replacedText);
+    fs.writeFileSync(swaggerFile, replacedText);
   }
   return Promise.resolve();
 }
