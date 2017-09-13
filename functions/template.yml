@@ -134,49 +134,56 @@ Resources:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref Scaledown
+      FunctionName:
+        Ref: Scaledown
       Principal: events.amazonaws.com
 
   ProfilesQueryPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref ProfilesQuery
+      FunctionName:
+        Ref: ProfilesQuery
       Principal: apigateway.amazonaws.com
 
   ProfilesGetPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref ProfilesGet
+      FunctionName:
+        Ref: ProfilesGet
       Principal: apigateway.amazonaws.com
 
   ProfilesPutPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref ProfilesPut
+      FunctionName:
+        Ref: ProfilesPut
       Principal: apigateway.amazonaws.com
 
   ProfilesPatchPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref ProfilesPatch
+      FunctionName:
+        Ref: ProfilesPatch
       Principal: apigateway.amazonaws.com
 
   ProfilesDeletePermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref ProfilesDelete
+      FunctionName:
+        Ref: ProfilesDelete
       Principal: apigateway.amazonaws.com
 
   AuthorizerPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref Authorizer
+      FunctionName:
+        Ref: Authorizer
       Principal: apigateway.amazonaws.com
 
   # Cloudwatch Events
@@ -187,5 +194,8 @@ Resources:
       Description: "Dummy write event to correctly scale-down profiles tables."
       ScheduleExpression: "cron(0/1 * * * ? *)"
       Targets:
-        - Arn: !GetAtt Scaledown.Arn
+        - Arn:
+            Fn::GetAtt:
+              - Scaledown
+              - Arn
           Id: profiles_operation_scaledown_event

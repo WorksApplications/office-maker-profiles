@@ -1,48 +1,55 @@
 process.env.EXEC_MODE = 'test';
 
-var childProcess = require('child_process');
-var fs = require('fs');
-var AWS = require('aws-sdk');
-var db = require('../functions/common/db.js');
-var dynamoUtil = require('../functions/common/dynamo-util.js');
-var options = require('../functions/common/db-options.js');
-var dynamodb = new AWS.DynamoDB(options);
-var documentClient = new AWS.DynamoDB.DocumentClient(options);
-var yaml = require('js-yaml');
-var assert = require('assert');
+const childProcess = require('child_process');
+const fs = require('fs');
+const AWS = require('aws-sdk');
+const db = require('../functions/common/db.js');
+const dynamoUtil = require('../functions/common/dynamo-util.js');
+const options = require('../functions/common/db-options.js');
+const dynamodb = new AWS.DynamoDB(options);
+const documentClient = new AWS.DynamoDB.DocumentClient(options);
+const yaml = require('js-yaml');
+const assert = require('assert');
 
-var profilesGet = require('../functions/profiles/get.js');
-var profilesPut = require('../functions/profiles/put.js');
-var profilesDelete = require('../functions/profiles/delete.js');
-var profilesQuery = require('../functions/profiles/query.js');
-var postsQuery = require('../functions/posts/query.js');
+const profilesGet = require('../functions/profiles/get.js');
+const profilesPut = require('../functions/profiles/put.js');
+const profilesDelete = require('../functions/profiles/delete.js');
+const profilesQuery = require('../functions/profiles/query.js');
+const postsQuery = require('../functions/posts/query.js');
 
-var dynamodbLocalPath = __dirname + '/../dynamodb_local';
-var port = 4569;
+const templateYmlPath = __dirname + '/../functions/template.yml';
+const dynamodbLocalPath = __dirname + '/../dynamodb_local';
+const port = 4569;
 
+function getTableProperties(templateYmlPath) {
+  var templateYml = yaml.safeLoad(fs.readFileSync(templateYmlPath, 'utf8'));
+  var resources = templateYml.Resources;
+  return filterTableProperties(resources);
+}
 
-// TODO: share with SAM template
-var tableDefYaml = fs.readFileSync(__dirname + '/test-table.yml', 'utf8');
-var searchTableDefYaml = fs.readFileSync(__dirname + '/search-table.yml', 'utf8');
-var postsTableDefYaml = fs.readFileSync(__dirname + '/posts-table.yml', 'utf8');
+function filterTableProperties(resources) {
+  return Object.keys(resources).map(function(key) {
+    const resource = resources[key];
+    if (resource.Type === 'AWS::DynamoDB::Table') {
+      return resource.Properties;
+    }
+    return null;
+  }).filter(p => !!p);
+}
 
 describe('Profile Lambda', () => {
-  var dbProcess = null;
+  let dbProcess = null;
 
   before(function() {
     this.timeout(5000);
     return runLocalDynamo(dynamodbLocalPath, port).then(p => {
       dbProcess = p;
       return delay(700).then(_ => {
-        // var tableDef = templateOutYml.Resources.ProfilesTable.Properties;
-        var tableDef = yaml.safeLoad(tableDefYaml).Properties;
-        return dynamoUtil.createTable(dynamodb, tableDef);
-      }).then(_ => {
-        var tableDef = yaml.safeLoad(searchTableDefYaml).Properties;
-        return dynamoUtil.createTable(dynamodb, tableDef);
-      }).then(_ => {
-        var tableDef = yaml.safeLoad(postsTableDefYaml).Properties;
-        return dynamoUtil.createTable(dynamodb, tableDef);
+        var tableProperties = getTableProperties(templateYmlPath);
+        var promises = tableProperties.map(tableProperty => {
+          return dynamoUtil.createTable(dynamodb, tableProperty);
+        });
+        return Promise.all(promises);
       });
     });
   });
