@@ -4,7 +4,8 @@ const Path = require('path');
 const AWS = require('aws-sdk');
 const yaml = require('js-yaml');
 
-const project = JSON.parse(fs.readFileSync('./config.json', 'utf8'));
+const configFile = './config.json';
+const project = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
 const cloudformation = new AWS.CloudFormation({
   region: project.region

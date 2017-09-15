@@ -1,10 +1,9 @@
 # secret
-config.json
+config.*json
 mockAuth.js
 *.pem
 functions/authorizer/sourceIp.js
 functions/authorizer/guest.js
-functions/common/headers.js
 
 
 # node
