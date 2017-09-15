@@ -148,7 +148,7 @@ paths:
               method.response.header.Access-Control-Allow-Credentials: "'true'"
               method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Pragma,Cache-Control,If-Modified-Since'"
-              method.response.header.Access-Control-Allow-Origin: "__ACCESS_CONTROL_ALLOW_ORIGIN__"
+              method.response.header.Access-Control-Allow-Origin: "'__ACCESS_CONTROL_ALLOW_ORIGIN__'"
         requestTemplates:
           application/json: '{"statusCode": 200}'
         passthroughBehavior: when_no_match
@@ -329,7 +329,7 @@ paths:
               method.response.header.Access-Control-Allow-Credentials: "'true'"
               method.response.header.Access-Control-Allow-Methods: "'GET,PUT,PATCH,DELETE,OPTIONS'"
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Pragma,Cache-Control,If-Modified-Since'"
-              method.response.header.Access-Control-Allow-Origin: "__ACCESS_CONTROL_ALLOW_ORIGIN__"
+              method.response.header.Access-Control-Allow-Origin: "'__ACCESS_CONTROL_ALLOW_ORIGIN__'"
         requestTemplates:
           application/json: '{"statusCode": 200}'
         passthroughBehavior: when_no_match
@@ -414,7 +414,7 @@ paths:
               method.response.header.Access-Control-Allow-Credentials: "'true'"
               method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Pragma,Cache-Control,If-Modified-Since'"
-              method.response.header.Access-Control-Allow-Origin: "__ACCESS_CONTROL_ALLOW_ORIGIN__"
+              method.response.header.Access-Control-Allow-Origin: "'__ACCESS_CONTROL_ALLOW_ORIGIN__'"
         requestTemplates:
           application/json: '{"statusCode": 200}'
         passthroughBehavior: when_no_match
