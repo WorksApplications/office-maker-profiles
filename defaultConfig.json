@@ -3,5 +3,6 @@
   "region": "",
   "s3Bucket": "",
   "stackName": "",
-  "restApiId": ""
+  "accessControlAllowOrigin": "",
+  "lambdaAlias": ""
 }
