@@ -32,6 +32,59 @@ securityDefinitions:
       type: token
 
 paths:
+  /sustain:
+    get:
+      description: |
+        アカウントサービス移行用の一時リソース。
+      parameters:
+        - "$ref": "#/parameters/Authorization_opt"
+      responses:
+        200:
+          description: "トークンをリフレッシュ"
+          schema:
+            type: object
+            properties:
+              token:
+                type: string
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+      x-amazon-apigateway-integration:
+        httpMethod: POST
+        responses:
+          default:
+            statusCode: "200"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_sustain/invocations"
+        type: aws_proxy
+    options:
+      consumes:
+        - application/json
+      responses:
+        '200':
+          description: 200 response
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Credentials:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Pragma,Cache-Control,If-Modified-Since'"
+              method.response.header.Access-Control-Allow-Origin: "'__ACCESS_CONTROL_ALLOW_ORIGIN__'"
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        passthroughBehavior: when_no_match
+        type: mock
   /profiles:
     get:
       description: |

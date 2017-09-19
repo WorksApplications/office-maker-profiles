@@ -70,6 +70,13 @@ Resources:
       Handler: authorizer/index.handler
       Runtime: nodejs6.10
 
+  Sustain:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: profiles_sustain
+      Handler: authorizer/sustain.handler
+      Runtime: nodejs6.10
+
   ProfilesQuery:
     Type: AWS::Serverless::Function
     Properties:
@@ -137,6 +144,14 @@ Resources:
       FunctionName:
         Ref: Scaledown
       Principal: events.amazonaws.com
+
+  SustainPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: Sustain
+      Principal: apigateway.amazonaws.com
 
   ProfilesQueryPermission:
     Type: "AWS::Lambda::Permission"

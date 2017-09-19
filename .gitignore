@@ -4,7 +4,7 @@ mockAuth.js
 *.pem
 functions/authorizer/sourceIp.js
 functions/authorizer/guest.js
-
+functions/authorizer/sustain.js
 
 # node
 node_modules
