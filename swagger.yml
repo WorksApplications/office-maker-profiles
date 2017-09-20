@@ -37,7 +37,7 @@ paths:
       description: |
         アカウントサービス移行用の一時リソース。
       parameters:
-        - "$ref": "#/parameters/Authorization_opt"
+        - "$ref": "#/parameters/Authorization"
       responses:
         200:
           description: "トークンをリフレッシュ"
