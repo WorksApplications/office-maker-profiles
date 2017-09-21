@@ -251,7 +251,7 @@ Resources:
   ScaledownEvent:
     Type: "AWS::Events::Rule"
     Properties:
-      Name: "profiles_operation_scaledown_event"
+      Name: "test_profiles_operation_scaledown_event"
       Description: "Dummy write event to correctly scale-down profiles tables."
       ScheduleExpression: "cron(0/1 * * * ? *)"
       Targets:
@@ -259,4 +259,4 @@ Resources:
             Fn::GetAtt:
               - Scaledown
               - Arn
-          Id: profiles_operation_scaledown_event
+          Id: test_profiles_operation_scaledown_event
