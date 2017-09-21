@@ -1,13 +1,22 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Profile Service
+Parameters:
+  TablePrefix:
+    Type: String
+    Default: dev_
+
+  LambdaAlias:
+    Type: String
+    Default: dev_
+
 Resources:
 
   # DynamoDB Tables
   ProfilesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: profiles
+      TableName: dev_profiles
       AttributeDefinitions:
       - AttributeName: userId
         AttributeType: S
@@ -21,7 +30,7 @@ Resources:
   profilesSearchHelpTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: profilesSearchHelp
+      TableName: dev_profilesSearchHelp
       AttributeDefinitions:
         - AttributeName: key
           AttributeType: S
@@ -39,7 +48,7 @@ Resources:
   ProfilesPostsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: profilesPosts
+      TableName: dev_profilesPosts
       AttributeDefinitions:
         - AttributeName: key
           AttributeType: S
@@ -58,7 +67,11 @@ Resources:
   Scaledown:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_operation_scaledown
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_operation_scaledown
       Handler: operation/scaledown.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
@@ -66,21 +79,33 @@ Resources:
   Authorizer:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_authorizer
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_authorizer
       Handler: authorizer/index.handler
       Runtime: nodejs6.10
 
   Sustain:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_sustain
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_sustain
       Handler: authorizer/sustain.handler
       Runtime: nodejs6.10
 
   ProfilesQuery:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_profiles_query
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_profiles_query
       Handler: profiles/query.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBReadOnlyAccess
@@ -89,7 +114,11 @@ Resources:
   ProfilesGet:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_profiles_get
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_profiles_get
       Handler: profiles/get.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBReadOnlyAccess
@@ -97,7 +126,11 @@ Resources:
   ProfilesPut:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_profiles_put
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_profiles_put
       Handler: profiles/put.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
@@ -105,7 +138,11 @@ Resources:
   ProfilesPatch:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_profiles_patch
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_profiles_patch
       Handler: profiles/patch.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
@@ -113,7 +150,11 @@ Resources:
   ProfilesDelete:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_profiles_delete
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_profiles_delete
       Handler: profiles/delete.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
@@ -121,7 +162,11 @@ Resources:
   PostsQuery:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: profiles_posts_query
+      FunctionName:
+        'Fn::Join':
+          - ''
+          - - Ref: LambdaAlias
+            - test_profiles_posts_query
       Handler: posts/query.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBReadOnlyAccess
@@ -134,7 +179,8 @@ Resources:
       StageName: dev
       DefinitionUri: ../tmp/swagger.yml
       Variables:
-        LambdaAlias: DEV
+        LambdaAlias:
+          Ref: LambdaAlias
 
   # Permissions
   ScaledownPermission:

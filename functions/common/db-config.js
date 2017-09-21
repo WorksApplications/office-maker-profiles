@@ -1,3 +1,4 @@
+const fs = require('fs');
 const configJsonFile = __dirname + '/config.json';
 const config = JSON.parse(fs.readFileSync(configJsonFile, 'utf8'));
 
@@ -15,6 +16,8 @@ const tableNames = {
   profilesPosts: alias + 'profilesPosts',
   profilesSearchHelp: alias + 'profilesSearchHelp'
 };
+
+console.log(tableNames);
 
 module.exports = {
   options: options,
