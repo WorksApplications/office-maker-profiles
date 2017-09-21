@@ -71,7 +71,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_operation_scaledown
+            - profiles_operation_scaledown
       Handler: operation/scaledown.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
@@ -83,7 +83,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_authorizer
+            - profiles_authorizer
       Handler: authorizer/index.handler
       Runtime: nodejs6.10
 
@@ -94,7 +94,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_sustain
+            - profiles_sustain
       Handler: authorizer/sustain.handler
       Runtime: nodejs6.10
 
@@ -105,7 +105,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_profiles_query
+            - profiles_profiles_query
       Handler: profiles/query.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBReadOnlyAccess
@@ -118,7 +118,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_profiles_get
+            - profiles_profiles_get
       Handler: profiles/get.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBReadOnlyAccess
@@ -130,7 +130,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_profiles_put
+            - profiles_profiles_put
       Handler: profiles/put.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
@@ -142,7 +142,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_profiles_patch
+            - profiles_profiles_patch
       Handler: profiles/patch.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
@@ -154,7 +154,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_profiles_delete
+            - profiles_profiles_delete
       Handler: profiles/delete.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBFullAccess
@@ -166,7 +166,7 @@ Resources:
         'Fn::Join':
           - ''
           - - Ref: LambdaAlias
-            - test_profiles_posts_query
+            - profiles_posts_query
       Handler: posts/query.handler
       Runtime: nodejs6.10
       Policies: AmazonDynamoDBReadOnlyAccess
