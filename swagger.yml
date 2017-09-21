@@ -2,7 +2,7 @@ swagger: '2.0'
 
 info:
   version: "1.0-SNAPSHOT"
-  title: "Profiles"
+  title: "__API_NAME__"
   description: |
     個人に紐づけられた最新の情報を管理します。
 

@@ -5,13 +5,13 @@ const AWS = require('aws-sdk');
 const yaml = require('js-yaml');
 
 const configFile = './config.json';
-const project = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
 const cloudformation = new AWS.CloudFormation({
-  region: project.region
+  region: config.region
 });
 const s3 = new AWS.S3({
-  region: project.region
+  region: config.region
 });
 
 const funcDir = Path.resolve('./functions');
@@ -22,10 +22,10 @@ const swaggerTemplateFile = 'swagger.yml'
 const swaggerFile = Path.resolve(tmpDir, 'swagger.yml');
 
 rmdir(funcDir + '/node_modules').then(_ => {
-  return generateSwaggerYml(project.accountId, project.region, project.accessControlAllowOrigin).then(_ => {
+  return generateSwaggerYml(config).then(_ => {
     return npmInstall(funcDir, true).then(_ => {
-      return cloudFormationPackage(funcDir, templateFile, outputTemplateFile, project.s3Bucket).then(_ => {
-        return cloudFormationDeploy(funcDir, outputTemplateFile, project.stackName);
+      return cloudFormationPackage(funcDir, templateFile, outputTemplateFile, config.s3Bucket).then(_ => {
+        return cloudFormationDeploy(funcDir, outputTemplateFile, config.stackName);
       });
     });
   }).then(_ => {
@@ -38,12 +38,13 @@ rmdir(funcDir + '/node_modules').then(_ => {
   process.exit(1);
 });
 
-function generateSwaggerYml(accountId, region, accessControlAllowOrigin) {
+function generateSwaggerYml(config) {
   if (fs.existsSync(swaggerTemplateFile)) {
     const replacedText = fs.readFileSync(swaggerTemplateFile, 'utf8')
-      .replace(/__ACCOUNT_ID__/g, accountId)
-      .replace(/__REGION__/g, region)
-      .replace(/__ACCESS_CONTROL_ALLOW_ORIGIN__/g, accessControlAllowOrigin);
+      .replace(/__API_NAME__/g, config.apiName)
+      .replace(/__ACCOUNT_ID__/g, config.accountId)
+      .replace(/__REGION__/g, config.region)
+      .replace(/__ACCESS_CONTROL_ALLOW_ORIGIN__/g, config.accessControlAllowOrigin);
     fs.writeFileSync(swaggerFile, replacedText);
   }
   return Promise.resolve();
