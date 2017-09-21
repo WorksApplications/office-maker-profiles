@@ -179,6 +179,7 @@ Resources:
       StageName: dev
       DefinitionUri: ../tmp/swagger.yml
       Variables:
+        HackUpdate: 0
         LambdaAlias:
           Ref: LambdaAlias
 
