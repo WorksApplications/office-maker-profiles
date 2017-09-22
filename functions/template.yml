@@ -10,7 +10,42 @@ Parameters:
     Type: String
     Default: dev_
 
+  ScalingRoleArn:
+    Type: String
+    Default: ""
+
 Resources:
+  # ScalingRole:
+  #   Type: "AWS::IAM::Role"
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         -
+  #           Effect: "Allow"
+  #           Principal:
+  #             Service:
+  #               - application-autoscaling.amazonaws.com
+  #           Action:
+  #             - "sts:AssumeRole"
+  #     Path: "/"
+  #     Policies:
+  #       -
+  #         PolicyName: "root"
+  #         PolicyDocument:
+  #           Version: "2012-10-17"
+  #           Statement:
+  #             -
+  #               Effect: "Allow"
+  #               Action:
+  #                 - "dynamodb:DescribeTable"
+  #                 - "dynamodb:UpdateTable"
+  #                 - "cloudwatch:PutMetricAlarm"
+  #                 - "cloudwatch:DescribeAlarms"
+  #                 - "cloudwatch:GetMetricStatistics"
+  #                 - "cloudwatch:SetAlarmState"
+  #                 - "cloudwatch:DeleteAlarms"
+  #               Resource: "*"
 
   # DynamoDB Tables
   ProfilesTable:
@@ -27,7 +62,36 @@ Resources:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
 
-  profilesSearchHelpTable:
+  ProfilesWriteCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 3
+      MinCapacity: 1
+      ResourceId:
+        'Fn::Join':
+          - /
+          - - table
+            - Ref: ProfilesTable
+      RoleARN:
+        Ref: ScalingRoleArn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+
+  ProfilesWriteScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: ProfilesWriteScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId:
+        Ref: ProfilesWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+  ProfilesSearchHelpTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: dev_profilesSearchHelp
@@ -44,6 +108,35 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
+
+  ProfilesSearchHelpWriteCapacityScalableTarget:
+    Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+    Properties:
+      MaxCapacity: 15
+      MinCapacity: 1
+      ResourceId:
+        'Fn::Join':
+          - /
+          - - table
+            - Ref: ProfilesSearchHelpTable
+      RoleARN:
+        Ref: ScalingRoleArn
+      ScalableDimension: dynamodb:table:WriteCapacityUnits
+      ServiceNamespace: dynamodb
+
+  ProfilesSearchHelpWriteScalingPolicy:
+    Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+    Properties:
+      PolicyName: ProfilesSearchHelpWriteScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId:
+        Ref: ProfilesSearchHelpWriteCapacityScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 50.0
+        ScaleInCooldown: 60
+        ScaleOutCooldown: 60
+        PredefinedMetricSpecification:
+          PredefinedMetricType: DynamoDBWriteCapacityUtilization
 
   ProfilesPostsTable:
     Type: AWS::DynamoDB::Table
