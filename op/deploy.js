@@ -4,7 +4,13 @@ const Path = require('path');
 const AWS = require('aws-sdk');
 const yaml = require('js-yaml');
 
-const configFile = './config.json';
+const funcDir = Path.resolve('./functions');
+const tmpDir = Path.resolve('./tmp');
+const templateFile = Path.resolve(funcDir, 'template.yml');
+const outputTemplateFile = Path.resolve(tmpDir, 'template.yml');
+const swaggerTemplateFile = 'swagger.yml'
+const swaggerFile = Path.resolve(tmpDir, 'swagger.yml');
+const configFile = Path.resolve(funcDir, 'common/config.json');
 const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
 const cloudformation = new AWS.CloudFormation({
@@ -13,13 +19,6 @@ const cloudformation = new AWS.CloudFormation({
 const s3 = new AWS.S3({
   region: config.region
 });
-
-const funcDir = Path.resolve('./functions');
-const tmpDir = Path.resolve('./tmp');
-const templateFile = Path.resolve(funcDir, 'template.yml');
-const outputTemplateFile = Path.resolve(tmpDir, 'template.yml');
-const swaggerTemplateFile = 'swagger.yml'
-const swaggerFile = Path.resolve(tmpDir, 'swagger.yml');
 
 rmdir(funcDir + '/node_modules').then(_ => {
   return generateSwaggerYml(config).then(_ => {
