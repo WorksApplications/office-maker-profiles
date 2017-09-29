@@ -28,9 +28,10 @@ function makeKeys(profile) {
   const normalizedRuby2 = normalizedRubyArray[normalizedRubyArray.length - 1] || null;
 
   const employeeId = profile.employeeId || null;
-  const mail = profile.mail || null;
-  const normalizedMailBeforeAt = (mail || '').split('@')[0] || null;
-  const normalizedMailBeforeUnderscore = (mail || '').split('_')[0] || null;
+  const mail = searchHelper.normalize(profile.mail || '') || null;
+  const normalizedMailBeforeAt = searchHelper.normalize((profile.mail || '').split('@')[0]) || null;
+  const normalizedMailBeforeUnderscore = searchHelper.normalize((profile.mail || '').split('_')[0]) || null;
+  const normalizedMailBeforeDot = searchHelper.normalize((profile.mail || '').split('.')[0]) || null;
   const normalizedPost = searchHelper.normalize(profile.post) || null;
   const normalizedOrganization = searchHelper.normalize(profile.organization) || null;
 
