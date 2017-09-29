@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
-const options = require('../common/db-options.js');
-const documentClient = new AWS.DynamoDB.DocumentClient(options);
+const options = require('../common/db-config.js');
+const documentClient = new AWS.DynamoDB.DocumentClient(options.options);
 const dynamoUtil = require('../common/dynamo-util.js');
 const log = require('../common/log.js');
 
@@ -10,7 +10,7 @@ exports.handler = () => {
   }, {
     userId: 'scaledown@worksap.co.jp'
   }).then(_ => {
-    return putAndDelete('profilesPosts', {
+    return putAndDelete(options.tableNames.profilesPosts, {
       key: 'scaledown',
       name: 'scaledown'
     }, {
@@ -18,7 +18,7 @@ exports.handler = () => {
       name: 'scaledown'
     });
   }).then(_ => {
-    return putAndDelete('profilesSearchHelp', {
+    return putAndDelete(options.tableNames.profilesSearchHelp, {
       key: 'scaledown',
       userId: 'scaledown'
     }, {

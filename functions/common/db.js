@@ -1,13 +1,13 @@
 const AWS = require('aws-sdk');
-const options = require('./db-options.js');
-const documentClient = new AWS.DynamoDB.DocumentClient(options);
+const options = require('./db-config.js');
+const documentClient = new AWS.DynamoDB.DocumentClient(options.options);
 const dynamoUtil = require('./dynamo-util.js');
 const searchHelper = require('./search-helper.js');
 const log = require('./log.js');
 
 function getProfile(userId) {
   return dynamoUtil.get(documentClient, {
-    TableName: "profiles",
+    TableName: options.tableNames.profiles,
     Key: {
       userId: userId
     }
@@ -74,7 +74,7 @@ function putKeysIntoSearchHelpTable(profile) {
       }
     };
   });
-  return strictBatchWrite('profilesSearchHelp', requests);
+  return strictBatchWrite(options.tableNames.profilesSearchHelp, requests);
 }
 
 function putKeysIntoPostTable(postName) {
@@ -107,7 +107,7 @@ function putKeysIntoPostTable(postName) {
     };
   });
   // console.log(JSON.stringify(requests, null, 2));
-  return strictBatchWrite('profilesPosts', requests);
+  return strictBatchWrite(options.tableNames.profilesPosts, requests);
 }
 
 function strictBatchWrite(tableName, requests) {
@@ -131,7 +131,7 @@ function strictBatchWrite(tableName, requests) {
 function putProfile(profile) {
   profile = dynamoUtil.deleteEmptyOrNull(profile);
   return dynamoUtil.put(documentClient, {
-    TableName: "profiles",
+    TableName: options.tableNames.profiles,
     Item: dynamoUtil.deleteEmptyOrNull(profile)
   });
 }
@@ -145,7 +145,7 @@ const patchProfile = function(profile) {
 
 function deleteProfile(userId) {
   return dynamoUtil.delete(documentClient, {
-    TableName: "profiles",
+    TableName: options.tableNames.profiles,
     Key: {
       userId: userId
     }
@@ -160,7 +160,7 @@ function findProfileByUserIds(userIds, limit, exclusiveStartKey) {
   }
   return dynamoUtil.batchGet(documentClient, {
     RequestItems: {
-      'profiles': {
+      [options.tableNames.profiles]: {
         Keys: userIds.map(userId => {
           return {
             userId: userId
@@ -172,7 +172,7 @@ function findProfileByUserIds(userIds, limit, exclusiveStartKey) {
     ExclusiveStartKey: exclusiveStartKey ? JSON.parse(exclusiveStartKey) : undefined
   }).then(data => {
     return Promise.resolve({
-      profiles: data.Responses['profiles'],
+      profiles: data.Responses[options.tableNames.profiles],
       lastEvaluatedKey: JSON.stringify(data.LastEvaluatedKey)
     });
   });
@@ -193,7 +193,7 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
   const searches = qs.map(q => {
     const normalizedQ = searchHelper.normalize(q);
     return dynamoUtil.query(documentClient, {
-      TableName: 'profilesSearchHelp',
+      TableName: options.tableNames.profilesSearchHelp,
       KeyConditionExpression: '#key = :key',
       ExpressionAttributeNames: {
         "#key": "key"
@@ -250,7 +250,7 @@ function findPostByQuery(q) {
   const searches = qs.map(q => {
     const normalizedQ = searchHelper.normalize(q);
     return dynamoUtil.query(documentClient, {
-      TableName: 'profilesPosts',
+      TableName: options.tableNames.profilesPosts,
       KeyConditionExpression: '#key = :key',
       ExpressionAttributeNames: {
         "#key": "key"

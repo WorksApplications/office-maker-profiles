@@ -5,9 +5,9 @@ const fs = require('fs');
 const AWS = require('aws-sdk');
 const db = require('../functions/common/db.js');
 const dynamoUtil = require('../functions/common/dynamo-util.js');
-const options = require('../functions/common/db-options.js');
-const dynamodb = new AWS.DynamoDB(options);
-const documentClient = new AWS.DynamoDB.DocumentClient(options);
+const options = require('../functions/common/db-config.js');
+const dynamodb = new AWS.DynamoDB(options.options);
+const documentClient = new AWS.DynamoDB.DocumentClient(options.options);
 const yaml = require('js-yaml');
 const assert = require('assert');
 
@@ -86,16 +86,7 @@ describe('Profile Lambda', () => {
       workplace: null // be sure to allow empty string
     }));
   });
-  // TODO: batch is not working for tests for now.
-  // describe('GET /posts', () => {
-  //   it('should search profiles by q', () => {
-  //     return handlerToPromise(postsQuery.handler)({
-  //       "queryStringParameters": {
-  //         "q": "Sales"
-  //       }
-  //     }, {}).then(assertPostLength(1));
-  //   });
-  // });
+
   describe('GET /profiles', () => {
     it('should search profiles by userId', () => {
       return handlerToPromise(profilesQuery.handler)({
@@ -325,7 +316,7 @@ function assertPostLength(expect) {
 function assertProfileLengthInDB(expect) {
   return result => {
     return dynamoUtil.scan(documentClient, {
-      TableName: "profiles"
+      TableName: options.tableNames.profiles
     }).then(data => {
       if (data.Items.length !== expect) {
         `Expected profile length ${expect} but got ${data.Items.length}`;
@@ -413,18 +404,3 @@ function runLocalDynamo(dynamodbLocalPath, port) {
     resolve(p);
   });
 }
-
-// function recursivelyGetAll(lambdaEvent, previous) {
-//   previous = previous || [];
-//   return handlerToPromise(profilesQuery.handler)(lambdaEvent, {}).then(res => {
-//     var profiles = JSON.parse(res.body).profiles;
-//     var lastEvaluatedKey = JSON.parse(res.body).lastEvaluatedKey;
-//     if (lastEvaluatedKey) {
-//       var newEvent = Object.assign({}, lambdaEvent);
-//       newEvent.queryStringParameters.exclusiveStartKey = lastEvaluatedKey;
-//       return recursivelyGetAll(newEvent, previous.concat(profiles));
-//     } else {
-//       return Promise.resolve(previous.concat(profiles));
-//     }
-//   });
-// }

@@ -4,28 +4,27 @@ const Path = require('path');
 const AWS = require('aws-sdk');
 const yaml = require('js-yaml');
 
-const configFile = './config.json';
-const project = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-
-const cloudformation = new AWS.CloudFormation({
-  region: project.region
-});
-const s3 = new AWS.S3({
-  region: project.region
-});
-
 const funcDir = Path.resolve('./functions');
 const tmpDir = Path.resolve('./tmp');
 const templateFile = Path.resolve(funcDir, 'template.yml');
 const outputTemplateFile = Path.resolve(tmpDir, 'template.yml');
 const swaggerTemplateFile = 'swagger.yml'
 const swaggerFile = Path.resolve(tmpDir, 'swagger.yml');
+const configFile = Path.resolve(funcDir, 'common/config.json');
+const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+
+const cloudformation = new AWS.CloudFormation({
+  region: config.region
+});
+const s3 = new AWS.S3({
+  region: config.region
+});
 
 rmdir(funcDir + '/node_modules').then(_ => {
-  return generateSwaggerYml(project.accountId, project.region, project.accessControlAllowOrigin).then(_ => {
+  return generateSwaggerYml(config).then(_ => {
     return npmInstall(funcDir, true).then(_ => {
-      return cloudFormationPackage(funcDir, templateFile, outputTemplateFile, project.s3Bucket).then(_ => {
-        return cloudFormationDeploy(funcDir, outputTemplateFile, project.stackName);
+      return cloudFormationPackage(funcDir, templateFile, outputTemplateFile, config.s3Bucket).then(_ => {
+        return cloudFormationDeploy(funcDir, outputTemplateFile, config.stackName, config.scalingRoleArn);
       });
     });
   }).then(_ => {
@@ -38,12 +37,13 @@ rmdir(funcDir + '/node_modules').then(_ => {
   process.exit(1);
 });
 
-function generateSwaggerYml(accountId, region, accessControlAllowOrigin) {
+function generateSwaggerYml(config) {
   if (fs.existsSync(swaggerTemplateFile)) {
     const replacedText = fs.readFileSync(swaggerTemplateFile, 'utf8')
-      .replace(/__ACCOUNT_ID__/g, accountId)
-      .replace(/__REGION__/g, region)
-      .replace(/__ACCESS_CONTROL_ALLOW_ORIGIN__/g, accessControlAllowOrigin);
+      .replace(/__API_NAME__/g, config.apiName)
+      .replace(/__ACCOUNT_ID__/g, config.accountId)
+      .replace(/__REGION__/g, config.region)
+      .replace(/__ACCESS_CONTROL_ALLOW_ORIGIN__/g, config.accessControlAllowOrigin);
     fs.writeFileSync(swaggerFile, replacedText);
   }
   return Promise.resolve();
@@ -76,7 +76,7 @@ function cloudFormationPackage(funcDir, templateFile, outputTemplateFile, s3Buck
   ]);
 }
 
-function cloudFormationDeploy(funcDir, templateFile, stackName) {
+function cloudFormationDeploy(funcDir, templateFile, stackName, scalingRoleArn) {
   return spawnCommand(funcDir, 'aws', [
     'cloudformation',
     'deploy',
@@ -85,7 +85,9 @@ function cloudFormationDeploy(funcDir, templateFile, stackName) {
     '--stack-name',
     stackName,
     '--capabilities',
-    'CAPABILITY_IAM'
+    'CAPABILITY_IAM',
+    '--parameter-overrides',
+    `ScalingRoleArn=${scalingRoleArn}`
   ]);
 }
 

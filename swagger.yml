@@ -2,7 +2,7 @@ swagger: '2.0'
 
 info:
   version: "1.0-SNAPSHOT"
-  title: "Profiles"
+  title: "__API_NAME__"
   description: |
     個人に紐づけられた最新の情報を管理します。
 
@@ -27,7 +27,7 @@ securityDefinitions:
     x-amazon-apigateway-authtype: oauth2
     x-amazon-apigateway-authorizer:
       authorizerResultTtlInSeconds: 0
-      authorizerUri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_authorizer/invocations"
+      authorizerUri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.LambdaAlias}profiles_authorizer/invocations"
       # authorizerCredentials: arn:aws:iam::__ACCOUNT_ID__:role
       type: token
 
@@ -55,7 +55,7 @@ paths:
         responses:
           default:
             statusCode: "200"
-        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_sustain/invocations"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.LambdaAlias}profiles_sustain/invocations"
         type: aws_proxy
     options:
       consumes:
@@ -176,7 +176,7 @@ paths:
         responses:
           default:
             statusCode: "200"
-        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_profiles_query/invocations"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.LambdaAlias}profiles_profiles_query/invocations"
         type: aws_proxy
     options:
       consumes:
@@ -242,7 +242,7 @@ paths:
         responses:
           default:
             statusCode: "200"
-        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_profiles_get/invocations"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.LambdaAlias}profiles_profiles_get/invocations"
         type: aws_proxy
 
     put:
@@ -275,7 +275,7 @@ paths:
         responses:
           default:
             statusCode: "200"
-        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_profiles_put/invocations"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.LambdaAlias}profiles_profiles_put/invocations"
         type: aws_proxy
 
     patch:
@@ -311,7 +311,7 @@ paths:
         responses:
           default:
             statusCode: "200"
-        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_profiles_patch/invocations"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.LambdaAlias}profiles_profiles_patch/invocations"
         type: aws_proxy
     delete:
       description: プロフィールを削除します。
@@ -349,7 +349,7 @@ paths:
         responses:
           default:
             statusCode: "200"
-        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_profiles_delete/invocations"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.LambdaAlias}profiles_profiles_delete/invocations"
         type: aws_proxy
     options:
       consumes:
@@ -442,7 +442,7 @@ paths:
         responses:
           default:
             statusCode: "200"
-        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.lambdaAlias}profiles_posts_query/invocations"
+        uri: "arn:aws:apigateway:__REGION__:lambda:path/2015-03-31/functions/arn:aws:lambda:__REGION__:__ACCOUNT_ID__:function:${stageVariables.LambdaAlias}profiles_posts_query/invocations"
         type: aws_proxy
     options:
       consumes:
