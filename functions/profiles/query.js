@@ -4,6 +4,7 @@ var headers = require('../common/headers.js');
 var log = require('../common/log.js');
 
 exports.handler = (event, context, callback) => {
+  console.log('event:', JSON.stringify(event, null, 2));
   var q = event.queryStringParameters.q || undefined;
   var userId = event.queryStringParameters.userId || undefined;
   var employeeId = event.queryStringParameters.employeeId || undefined;
