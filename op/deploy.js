@@ -24,7 +24,12 @@ rmdir(funcDir + '/node_modules').then(_ => {
   return generateSwaggerYml(config).then(_ => {
     return npmInstall(funcDir, true).then(_ => {
       return cloudFormationPackage(funcDir, templateFile, outputTemplateFile, config.s3Bucket).then(_ => {
-        return cloudFormationDeploy(funcDir, outputTemplateFile, config.stackName, config.scalingRoleArn);
+        return cloudFormationDeploy(funcDir,
+          outputTemplateFile,
+          config.stackName,
+          config.scalingRoleArn,
+          config.tablePrefix,
+          config.lambdaAlias);
       });
     });
   }).then(_ => {
@@ -76,7 +81,7 @@ function cloudFormationPackage(funcDir, templateFile, outputTemplateFile, s3Buck
   ]);
 }
 
-function cloudFormationDeploy(funcDir, templateFile, stackName, scalingRoleArn) {
+function cloudFormationDeploy(funcDir, templateFile, stackName, scalingRoleArn, tablePrefix, lambdaAlias) {
   return spawnCommand(funcDir, 'aws', [
     'cloudformation',
     'deploy',
@@ -87,7 +92,9 @@ function cloudFormationDeploy(funcDir, templateFile, stackName, scalingRoleArn) 
     '--capabilities',
     'CAPABILITY_IAM',
     '--parameter-overrides',
-    `ScalingRoleArn=${scalingRoleArn}`
+    `ScalingRoleArn=${scalingRoleArn}`,
+    `TablePrefix=${tablePrefix}`,
+    `LambdaAlias=${lambdaAlias}`
   ]);
 }
 

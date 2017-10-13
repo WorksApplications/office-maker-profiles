@@ -4,11 +4,9 @@ Description: Profile Service
 Parameters:
   TablePrefix:
     Type: String
-    Default: dev_
 
   LambdaAlias:
     Type: String
-    Default: dev_
 
   ScalingRoleArn:
     Type: String
@@ -51,7 +49,11 @@ Resources:
   ProfilesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: dev_profiles
+      TableName:
+        'Fn::Join':
+          - ''
+          - - Ref: TablePrefix
+            - profiles
       AttributeDefinitions:
       - AttributeName: userId
         AttributeType: S
@@ -94,7 +96,11 @@ Resources:
   ProfilesSearchHelpTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: dev_profilesSearchHelp
+      TableName:
+        'Fn::Join':
+          - ''
+          - - Ref: TablePrefix
+            - profilesSearchHelp
       AttributeDefinitions:
         - AttributeName: key
           AttributeType: S
@@ -141,7 +147,11 @@ Resources:
   ProfilesPostsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: dev_profilesPosts
+      TableName:
+        'Fn::Join':
+          - ''
+          - - Ref: TablePrefix
+            - profilesPosts
       AttributeDefinitions:
         - AttributeName: key
           AttributeType: S
