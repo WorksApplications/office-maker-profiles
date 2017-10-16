@@ -8,7 +8,7 @@ exports.handler = (event, context, callback) => {
   db.putProfileAndMakeIndex(profile).then(_ => {
     lambdaUtil.send(callback, 200);
   }).catch(e => {
-    // console.log(e.stack)
+    console.log('error:', e);
     lambdaUtil.send(callback, 500, {
       message: e.message
     });

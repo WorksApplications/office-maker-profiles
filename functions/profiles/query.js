@@ -36,6 +36,7 @@ exports.handler = (event, context, callback) => {
         body: result ? JSON.stringify(result) : ''
       });
     }).catch(e => {
+      console.log('error:', e);
       lambdaUtil.send(callback, 500, {
         message: e.message
       });

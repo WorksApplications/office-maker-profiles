@@ -11,6 +11,7 @@ exports.handler = (event, context, callback) => {
       lambdaUtil.send(callback, 404);
     }
   }).catch(e => {
+    console.log('error:', e);
     lambdaUtil.send(callback, 500, {
       message: e.message
     });

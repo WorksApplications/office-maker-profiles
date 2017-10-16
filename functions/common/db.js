@@ -220,6 +220,8 @@ function searchProfilesByAnd(searches, limit) {
       });
     });
     var userIds = Object.keys(count).filter(userId => count[userId] === recordsList.length);
+    console.log('users to be searched:', userIds.length);
+    userIds.length = Math.min(userIds.length, 100);
     return findProfileByUserIds(userIds, limit).then(res => {
       log('got ' + res.profiles.length, 'took ' + (Date.now() - start) + 'ms');
       return res;

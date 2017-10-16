@@ -7,6 +7,7 @@ exports.handler = (event, context, callback) => {
   db.deleteProfile(userId).then(_ => {
     lambdaUtil.send(callback, 200);
   }).catch(e => {
+    console.log('error:', e);
     lambdaUtil.send(callback, 500, {
       message: e.message
     });
