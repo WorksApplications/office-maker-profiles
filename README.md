@@ -10,7 +10,9 @@ Serverless implementation for Office Maker Profile Service.
 
 ## Install
 
-TODO
+```
+npm isntall
+```
 
 ## Build
 
@@ -19,16 +21,18 @@ TODO
 ## Test
 
 ```
-$ npm test
+npm test
 ```
 
 ## Deploy
 
-TODO
+```
+sh deploy.sh <stage name>
+```
 
 ## Configuration
 
-TODO
+config.<stage name>.json
 
 ## Copyright
 
