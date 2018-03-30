@@ -34,6 +34,7 @@ function makeKeys(profile) {
   const normalizedMailBeforeDot = searchHelper.normalize((profile.mail || '').split('.')[0]) || null;
   const normalizedPost = searchHelper.normalize(profile.post) || null;
   const normalizedOrganization = searchHelper.normalize(profile.organization) || null;
+  const extensionPhone = profile.extensionPhone || null;
 
   const keys = {};
   [normalizedName1,
@@ -44,7 +45,8 @@ function makeKeys(profile) {
     mail,
     normalizedMailBeforeAt,
     normalizedMailBeforeUnderscore,
-    normalizedPost
+    normalizedPost,
+    extensionPhone
   ].filter(key => {
     return !!key;
   }).forEach(key => {
