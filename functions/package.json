@@ -1,0 +1,18 @@
+{
+  "name": "profile-service",
+  "version": "1.0.0",
+  "description": "Serverless implementation for Office Maker Profile Service",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha test/lambda-test.js",
+    "posttest": "mocha test/api-test.js"
+  },
+  "author": "",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "jsonwebtoken": "^7.4.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.86.0"
+  }
+}

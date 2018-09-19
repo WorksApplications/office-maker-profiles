@@ -1,0 +1,252 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: Office-Maker-Profiles
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  stage: ${opt:stage, 'dev'}
+  region: ap-northeast-1
+  environment:
+    TABLE_PREFIX: ${self:custom.external_file.environment.tablePrefix}
+  memorySize: 128
+  timeout: 15
+  role: ${self:custom.external_file.environment.provider.role}
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'lambda:InvokeFunction'
+        - "dynamodb:*"
+      Resource:
+      - Fn::Join:
+        - ':'
+        - - arn:aws:lambda
+          - Ref: AWS::Region
+          - Ref: AWS::AccountId
+          - function:${self:service}-${opt:stage, self:provider.stage}-*
+
+custom:
+  dynamodb:
+  # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8010
+      inMemory: true
+      migrate: false
+      seed: false
+      convertEmptyValues: true
+    # Uncomment only if you already have a DynamoDB running locally
+    noStart: true
+  external_file:
+    environment: ${file(./config.yml)}
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+functions:
+  scaledown:
+    handler: functions/operation/scaledown.handler
+    name: ${self:service}-${self:provider.stage}-scaledown
+  sustain:
+    handler: functions/authorizer/sustain.handler
+    package:
+      include:
+        - functions/authorizer/**
+        - functions/common/**
+    events:
+      - http:
+          path: sustain
+          method: GET
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+  authorizer:
+    handler: functions/authorizer/index.handler
+    name: ${self:service}-${self:provider.stage}-authorizer
+    package:
+      include:
+        - functions/authorizer/**
+    environment:
+      sourceIp: ${self:custom.external_file.environment.functions.sourceIp}
+  profilesQuery:
+    handler: functions/profiles/query.handler
+    name: ${self:service}-${self:provider.stage}-profilesQuery
+    events:
+      - http:
+          path: profiles
+          method: get
+  profilesGet:
+    handler: functions/profiles/get.handler
+    name: ${self:service}-${self:provider.stage}-profilesGet
+    events:
+      - http:
+          path: profiles/{userId}
+          method: get
+  profilesPut:
+    handler: functions/profiles/put.handler
+    name: ${self:service}-${self:provider.stage}-profilesPut
+    events:
+      - http:
+          path: profiles/{userId}
+          method: put
+  profilesPatch:
+    handler: functions/profiles/patch.handler
+    name: ${self:service}-${self:provider.stage}-profilesPatch
+    events:
+      - http:
+          path: profiles/{userId}
+          method: patch
+  profilesDelete:
+    handler: functions/profiles/delete.handler
+    name: ${self:service}-${self:provider.stage}-profilesDelete
+    events:
+      - http:
+          path: profiles/{userId}
+          method: delete
+
+resources:
+  Resources:
+    ProfilesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName:
+          'Fn::Join':
+            - ''
+            - - Ref: TablePrefix
+              - profiles
+        AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    ProfilesWriteCapacityScalableTarget:
+      Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+      Properties:
+        MaxCapacity: 3
+        MinCapacity: 1
+        ResourceId:
+          'Fn::Join':
+            - /
+            - - table
+              - Ref: ProfilesTable
+        RoleARN:
+          Ref: ScalingRoleArn
+        ScalableDimension: dynamodb:table:WriteCapacityUnits
+        ServiceNamespace: dynamodb
+
+    ProfilesWriteScalingPolicy:
+      Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+      Properties:
+        PolicyName: ProfilesWriteScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId:
+          Ref: ProfilesWriteCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 50.0
+          ScaleInCooldown: 60
+          ScaleOutCooldown: 60
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+    ProfilesSearchHelpTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName:
+          'Fn::Join':
+            - ''
+            - - Ref: TablePrefix
+              - profilesSearchHelp
+        AttributeDefinitions:
+          - AttributeName: key
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: key
+            KeyType: HASH
+          - AttributeName: userId
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    ProfilesSearchHelpWriteCapacityScalableTarget:
+      Type: "AWS::ApplicationAutoScaling::ScalableTarget"
+      Properties:
+        MaxCapacity: 15
+        MinCapacity: 1
+        ResourceId:
+          'Fn::Join':
+            - /
+            - - table
+              - Ref: ProfilesSearchHelpTable
+        RoleARN:
+          Ref: ScalingRoleArn
+        ScalableDimension: dynamodb:table:WriteCapacityUnits
+        ServiceNamespace: dynamodb
+
+    ProfilesSearchHelpWriteScalingPolicy:
+      Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
+      Properties:
+        PolicyName: ProfilesSearchHelpWriteScalingPolicy
+        PolicyType: TargetTrackingScaling
+        ScalingTargetId:
+          Ref: ProfilesSearchHelpWriteCapacityScalableTarget
+        TargetTrackingScalingPolicyConfiguration:
+          TargetValue: 50.0
+          ScaleInCooldown: 60
+          ScaleOutCooldown: 60
+          PredefinedMetricSpecification:
+            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+
+    ProfilesPostsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName:
+          'Fn::Join':
+            - ''
+            - - Ref: TablePrefix
+              - profilesPosts
+        AttributeDefinitions:
+          - AttributeName: key
+            AttributeType: S
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: key
+            KeyType: HASH
+          - AttributeName: name
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+plugins:
+  - serverless-plugin-stage-variables
+  - serverless-dynamodb-local
+  - serverless-apigw-binary
+  - serverless-dynamodb-autoscaling
+  - serverless-offline
