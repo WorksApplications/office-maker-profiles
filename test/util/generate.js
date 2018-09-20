@@ -18,17 +18,17 @@ var profiles = fs.readFileSync(__dirname + '/mock.csv', 'utf8').replace(/\r/g, '
     return null;
   }
   return {
-    userId: zeroPadding(index, 4) + '@example.com',
-    employeeId: zeroPadding(index, 4),
+    userId: encodeURIComponent(zeroPadding(index, 4) + '@example.com'),
+    employeeId: encodeURIComponent(zeroPadding(index, 4)),
     picture: null,
-    name: name,
-    ruby: ruby,
-    organization: 'Example Co., Ltd.',
-    post: 'Example ' + Math.floor(index / 1000),
+    name: encodeURIComponent(name),
+    ruby: encodeURIComponent(ruby),
+    organization: encodeURIComponent('Example Co., Ltd.'),
+    post: encodeURIComponent('Example ' + Math.floor(index / 1000)),
     rank: index % 10 === 0 ? 'Manager' : 'Assistant',
-    cellPhone: '080-XXX-' + zeroPadding(index, 4),
+    cellPhone: encodeURIComponent('080-XXX-' + zeroPadding(index, 4)),
     extensionPhone: 'XXXXX',
-    mail: zeroPadding(index, 4) + '@example.com',
+    mail: encodeURIComponent(zeroPadding(index, 4) + '@example.com'),
     workplace: null
   }
 }).filter(profile => !!profile);
