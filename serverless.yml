@@ -41,21 +41,17 @@ provider:
           - function:${self:service}-${opt:stage, self:provider.stage}-*
 
 custom:
+  external_file:
+    environment: ${file(./config.yml)}
   dynamodb:
-  # If you only want to use DynamoDB Local in some stages, declare them here
-    stages:
-      - dev
     start:
       port: 8010
       inMemory: true
-      migrate: false
-      seed: false
+      migrate: true
+      seed: true
       convertEmptyValues: true
     # Uncomment only if you already have a DynamoDB running locally
     noStart: true
-  external_file:
-    environment: ${file(./config.yml)}
-
 package:
   individually: true
   exclude:
@@ -127,11 +123,11 @@ resources:
     ProfilesTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName:
-          'Fn::Join':
-            - ''
-            - - Ref: TablePrefix
-              - profiles
+        TableName: "${self:custom.external_file.environment.tablePrefix}profiles"
+#          'Fn::Join':
+#            - ''
+#            - - Ref: TablePrefix
+#              - profiles
         AttributeDefinitions:
         - AttributeName: userId
           AttributeType: S
@@ -174,11 +170,11 @@ resources:
     ProfilesSearchHelpTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName:
-          'Fn::Join':
-            - ''
-            - - Ref: TablePrefix
-              - profilesSearchHelp
+        TableName: "${self:custom.external_file.environment.tablePrefix}profilesSearchHelp"
+#          'Fn::Join':
+#            - ''
+#            - - Ref: TablePrefix
+#              - profilesSearchHelp
         AttributeDefinitions:
           - AttributeName: key
             AttributeType: S
@@ -225,11 +221,11 @@ resources:
     ProfilesPostsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName:
-          'Fn::Join':
-            - ''
-            - - Ref: TablePrefix
-              - profilesPosts
+        TableName: "${self:custom.external_file.environment.tablePrefix}profilesPosts"
+#          'Fn::Join':
+#            - ''
+#            - - Ref: TablePrefix
+#              - profilesPosts
         AttributeDefinitions:
           - AttributeName: key
             AttributeType: S

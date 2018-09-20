@@ -23,6 +23,7 @@
     "serverless-plugin-stage-variables": "^1.8.0"
   },
   "dependencies": {
+    "npm": "^6.4.1",
     "serverless-import-swagger": "^0.1.1"
   }
 }

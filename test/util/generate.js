@@ -3,11 +3,12 @@
 
 var fs = require('fs');
 var AWS = require('aws-sdk');
-var dynamoUtil = require('../functions/common/dynamo-util.js');
+var dynamoUtil = require('../../functions/common/dynamo-util.js');
 var dynamodb = new AWS.DynamoDB();
-var project = JSON.parse(fs.readFileSync('./project.json', 'utf8'));
+// var project = JSON.parse(fs.readFileSync('./project.json', 'utf8'));
 var documentClient = new AWS.DynamoDB.DocumentClient({
-  region: project.region
+  region: 'localhost',
+  endpoint: 'http://localhost:8010'
 });
 
 var profiles = fs.readFileSync(__dirname + '/mock.csv', 'utf8').replace(/\r/g, '').split('\n').map((line, index) => {
@@ -33,19 +34,20 @@ var profiles = fs.readFileSync(__dirname + '/mock.csv', 'utf8').replace(/\r/g, '
 }).filter(profile => !!profile);
 
 console.log('generating mock data...');
-// profiles.reduce((promise, profile) => {
-//   return promise.then(_ => putProfile(profile));
-// }, Promise.resolve()).then(_ => {
-//   console.log('done');
-//   process.exit(0);
-// }).catch(e => {
-//   console.error(e);
-//   process.exit(1);
-// });
+profiles.reduce((promise, profile) => {
+   return promise.then(_ => putProfile(profile));
+ }, Promise.resolve()).then(_ => {
+   console.log('done');
+   process.exit(0);
+ }).catch(e => {
+   console.error(e);
+   process.exit(1);
+ });
 
 function putProfile(profile) {
+  console.log(profile);
   return dynamoUtil.put(documentClient, {
-    TableName: "profiles",
+    TableName: "dev_profiles",
     Item: profile
   });
 }
