@@ -21,12 +21,15 @@ provider:
   name: aws
   runtime: nodejs6.10
   stage: ${opt:stage, 'dev'}
-  region: ap-northeast-1
+  region: ${self:custom.external_file.environment.region}
   environment:
     TABLE_PREFIX: ${self:custom.external_file.environment.tablePrefix}
+    DB_ENDPOINT: ${self:custom.external_file.environment.dynamodb.endpoint, ''}
+    REGION: ${self:custom.provider.region, "ap-northeast-1"}
+    DB_PORT: ${self:custom.external_file.environment.dynamodb.port, ''}
   memorySize: 128
   timeout: 15
-  role: ${self:custom.external_file.environment.provider.role}
+  role: ${self:custom.external_file.environment.scalingRoleArn}
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
@@ -39,19 +42,20 @@ provider:
           - Ref: AWS::Region
           - Ref: AWS::AccountId
           - function:${self:service}-${opt:stage, self:provider.stage}-*
+    
 
 custom:
   external_file:
-    environment: ${file(./config.yml)}
+    environment: ${file(./config.${self:provider.stage}.json)}
   dynamodb:
     start:
-      port: 8010
+      port: ${self:custom.external_file.environment.dynamodb.port, "8000"}
       inMemory: true
       migrate: true
       seed: true
       convertEmptyValues: true
     # Uncomment only if you already have a DynamoDB running locally
-    noStart: true
+    # noStart: true
 package:
   individually: true
   exclude:
@@ -81,7 +85,7 @@ functions:
       include:
         - functions/authorizer/**
     environment:
-      sourceIp: ${self:custom.external_file.environment.functions.sourceIp}
+      sourceIp: ${self:custom.external_file.environment.sourceIp}
   profilesQuery:
     handler: functions/profiles/query.handler
     name: ${self:service}-${self:provider.stage}-profilesQuery
@@ -89,6 +93,29 @@ functions:
       - http:
           path: profiles
           method: get
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - Pragma
+              - Cache-Control
+              - If-Modified-Since
+            allowCredentials: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            type: token
+          request:
+            parameters:
+              headers:
+                authorization: true
+
   profilesGet:
     handler: functions/profiles/get.handler
     name: ${self:service}-${self:provider.stage}-profilesGet
@@ -96,6 +123,31 @@ functions:
       - http:
           path: profiles/{userId}
           method: get
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - Pragma
+              - Cache-Control
+              - If-Modified-Since
+            allowCredentials: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            type: token
+          request:
+            parameters:
+              headers:
+                authorization: true
+              paths:
+                userId: true
+
   profilesPut:
     handler: functions/profiles/put.handler
     name: ${self:service}-${self:provider.stage}-profilesPut
@@ -103,6 +155,31 @@ functions:
       - http:
           path: profiles/{userId}
           method: put
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - Pragma
+              - Cache-Control
+              - If-Modified-Since
+            allowCredentials: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            type: token
+          request:
+            parameters:
+              headers:
+                authorization: true
+              paths:
+                userId: true
+
   profilesPatch:
     handler: functions/profiles/patch.handler
     name: ${self:service}-${self:provider.stage}-profilesPatch
@@ -110,6 +187,31 @@ functions:
       - http:
           path: profiles/{userId}
           method: patch
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - Pragma
+              - Cache-Control
+              - If-Modified-Since
+            allowCredentials: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            type: token
+          request:
+            parameters:
+              headers:
+                authorization: true
+              paths:
+                userId: true
+
   profilesDelete:
     handler: functions/profiles/delete.handler
     name: ${self:service}-${self:provider.stage}-profilesDelete
@@ -117,6 +219,30 @@ functions:
       - http:
           path: profiles/{userId}
           method: delete
+          integration: lambda-proxy
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+              - Pragma
+              - Cache-Control
+              - If-Modified-Since
+            allowCredentials: true
+          authorizer:
+            name: authorizer
+            resultTtlInSeconds: 0
+            type: token
+          request:
+            parameters:
+              headers:
+                authorization: true
+              paths:
+                userId: true
 
 resources:
   Resources:
@@ -240,9 +366,86 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
+    ScaledownPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName:
+          Ref: Scaledown
+        Principal: events.amazonaws.com
+
+    SustainPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName:
+          Ref: Sustain
+        Principal: apigateway.amazonaws.com
+
+    ProfilesQueryPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName:
+          Ref: ProfilesQuery
+        Principal: apigateway.amazonaws.com
+
+    ProfilesGetPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName:
+          Ref: ProfilesGet
+        Principal: apigateway.amazonaws.com
+
+    ProfilesPutPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName:
+          Ref: ProfilesPut
+        Principal: apigateway.amazonaws.com
+
+    ProfilesPatchPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName:
+          Ref: ProfilesPatch
+        Principal: apigateway.amazonaws.com
+
+    ProfilesDeletePermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName:
+          Ref: ProfilesDelete
+        Principal: apigateway.amazonaws.com
+
+    AuthorizerPermission:
+      Type: "AWS::Lambda::Permission"
+      Properties:
+        Action: lambda:InvokeFunction
+        FunctionName:
+          Ref: Authorizer
+        Principal: apigateway.amazonaws.com
+
+    # Cloudwatch Events
+    ScaledownEvent:
+      Type: "AWS::Events::Rule"
+      Properties:
+        Name: "test_profiles_operation_scaledown_event"
+        Description: "Dummy write event to correctly scale-down profiles tables."
+        ScheduleExpression: "cron(0/1 * * * ? *)"
+        Targets:
+          - Arn:
+              Fn::GetAtt:
+                - Scaledown
+                - Arn
+            Id: test_profiles_operation_scaledown_event
+
 plugins:
   - serverless-plugin-stage-variables
   - serverless-dynamodb-local
-  - serverless-apigw-binary
   - serverless-dynamodb-autoscaling
   - serverless-offline
