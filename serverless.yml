@@ -57,20 +57,17 @@ custom:
     # Uncomment only if you already have a DynamoDB running locally
     # noStart: true
 package:
-  individually: true
   exclude:
-    - ./**
-
+    - .git/**
+    - node_modules/**
+    - test/**
+    - .dynamodb/**
 functions:
   scaledown:
     handler: functions/operation/scaledown.handler
     name: ${self:service}-${self:provider.stage}-scaledown
   sustain:
     handler: functions/authorizer/sustain.handler
-    package:
-      include:
-        - functions/authorizer/**
-        - functions/common/**
     events:
       - http:
           path: sustain
@@ -81,11 +78,8 @@ functions:
   authorizer:
     handler: functions/authorizer/index.handler
     name: ${self:service}-${self:provider.stage}-authorizer
-    package:
-      include:
-        - functions/authorizer/**
-    environment:
-      sourceIp: ${self:custom.external_file.environment.sourceIp}
+    # environment:
+    #   sourceIp: ${self:custom.external_file.environment.sourceIp}
   profilesQuery:
     handler: functions/profiles/query.handler
     name: ${self:service}-${self:provider.stage}-profilesQuery
