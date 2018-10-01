@@ -268,8 +268,7 @@ resources:
             - /
             - - table
               - Ref: ProfilesTable
-        RoleARN:
-          Ref: ScalingRoleArn
+        RoleARN: ${self:provider.role}
         ScalableDimension: dynamodb:table:WriteCapacityUnits
         ServiceNamespace: dynamodb
 
@@ -319,8 +318,7 @@ resources:
             - /
             - - table
               - Ref: ProfilesSearchHelpTable
-        RoleARN:
-          Ref: ScalingRoleArn
+        RoleARN: ${self:provider.role}
         ScalableDimension: dynamodb:table:WriteCapacityUnits
         ServiceNamespace: dynamodb
 
