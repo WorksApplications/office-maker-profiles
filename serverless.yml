@@ -363,7 +363,7 @@ resources:
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
-          Ref: Scaledown
+          Ref: ScaledownLambdaFunction
         Principal: events.amazonaws.com
 
     SustainPermission:
@@ -371,7 +371,7 @@ resources:
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
-          Ref: Sustain
+          Ref: SustainLambdaFunction
         Principal: apigateway.amazonaws.com
 
     ProfilesQueryPermission:
@@ -379,7 +379,7 @@ resources:
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
-          Ref: ProfilesQuery
+          Ref: ProfilesQueryLambdaFunction
         Principal: apigateway.amazonaws.com
 
     ProfilesGetPermission:
@@ -387,7 +387,7 @@ resources:
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
-          Ref: ProfilesGet
+          Ref: ProfilesGetLambdaFunction
         Principal: apigateway.amazonaws.com
 
     ProfilesPutPermission:
@@ -395,7 +395,7 @@ resources:
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
-          Ref: ProfilesPut
+          Ref: ProfilesPutLambdaFunction
         Principal: apigateway.amazonaws.com
 
     ProfilesPatchPermission:
@@ -403,7 +403,7 @@ resources:
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
-          Ref: ProfilesPatch
+          Ref: ProfilesPatchLambdaFunction
         Principal: apigateway.amazonaws.com
 
     ProfilesDeletePermission:
@@ -411,7 +411,7 @@ resources:
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
-          Ref: ProfilesDelete
+          Ref: ProfilesDeleteLambdaFunction
         Principal: apigateway.amazonaws.com
 
     AuthorizerPermission:
@@ -419,7 +419,7 @@ resources:
       Properties:
         Action: lambda:InvokeFunction
         FunctionName:
-          Ref: Authorizer
+          Ref: AuthorizerLambdaFunction
         Principal: apigateway.amazonaws.com
 
     # Cloudwatch Events
@@ -432,7 +432,7 @@ resources:
         Targets:
           - Arn:
               Fn::GetAtt:
-                - Scaledown
+                - ScaledownLambdaFunction
                 - Arn
             Id: test_profiles_operation_scaledown_event
 
