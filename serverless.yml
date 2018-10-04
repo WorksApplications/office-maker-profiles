@@ -29,7 +29,6 @@ provider:
     DB_PORT: ${self:custom.external_file.environment.dynamodb.port, ''}
   memorySize: 128
   timeout: 15
-  role: ${self:custom.external_file.environment.scalingRoleArn}
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
@@ -268,7 +267,7 @@ resources:
             - /
             - - table
               - Ref: ProfilesTable
-        RoleARN: ${self:provider.role}
+        RoleARN: ${self:custom.external_file.environment.scalingRoleArn}
         ScalableDimension: dynamodb:table:WriteCapacityUnits
         ServiceNamespace: dynamodb
 
@@ -318,7 +317,7 @@ resources:
             - /
             - - table
               - Ref: ProfilesSearchHelpTable
-        RoleARN: ${self:provider.role}
+        RoleARN: ${self:custom.external_file.environment.scalingRoleArn}
         ScalableDimension: dynamodb:table:WriteCapacityUnits
         ServiceNamespace: dynamodb
 
