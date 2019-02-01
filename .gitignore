@@ -19,3 +19,5 @@ test.sh
 dynamodb_local
 
 .serverless/
+
+config.*.json
