@@ -20,8 +20,5 @@
     "serverless-dynamodb-local": "^0.2.35",
     "serverless-offline": "^3.25.11",
     "serverless-plugin-stage-variables": "^1.8.0"
-  },
-  "dependencies": {
-    "npm": "^6.4.1",
   }
 }
