@@ -16,7 +16,6 @@
     "mocha": "^3.4.2",
     "node-zip": "^1.1.1",
     "request": "^2.81.0",
-    "serverless-dynamodb-autoscaling": "^0.6.2",
     "serverless-dynamodb-local": "^0.2.35",
     "serverless-offline": "^3.25.11",
     "serverless-plugin-stage-variables": "^1.8.0"

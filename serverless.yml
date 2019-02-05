@@ -356,5 +356,4 @@ resources:
 plugins:
   - serverless-plugin-stage-variables
   - serverless-dynamodb-local
-  - serverless-dynamodb-autoscaling
   - serverless-offline
