@@ -247,7 +247,7 @@ resources:
     ProfilesTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: "${self:custom.external_file.environment.tablePrefix}profiles"
+        TableName: ${self:provider.stage}-profiles
 #          'Fn::Join':
 #            - ''
 #            - - Ref: TablePrefix
@@ -263,7 +263,7 @@ resources:
     ProfilesSearchHelpTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: "${self:custom.external_file.environment.tablePrefix}profilesSearchHelp"
+        TableName: ${self:provider.stage}-profilesSearchHelp
 #          'Fn::Join':
 #            - ''
 #            - - Ref: TablePrefix
@@ -283,7 +283,7 @@ resources:
     ProfilesPostsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: "${self:custom.external_file.environment.tablePrefix}profilesPosts"
+        TableName: ${self:provider.stage}-profilesPosts
 #          'Fn::Join':
 #            - ''
 #            - - Ref: TablePrefix
