@@ -258,37 +258,7 @@ resources:
         KeySchema:
         - AttributeName: userId
           KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-
-    ProfilesWriteCapacityScalableTarget:
-      Type: "AWS::ApplicationAutoScaling::ScalableTarget"
-      Properties:
-        MaxCapacity: 3
-        MinCapacity: 1
-        ResourceId:
-          'Fn::Join':
-            - /
-            - - table
-              - Ref: ProfilesTable
-        RoleARN: ${self:custom.external_file.environment.scalingRoleArn}
-        ScalableDimension: dynamodb:table:WriteCapacityUnits
-        ServiceNamespace: dynamodb
-
-    ProfilesWriteScalingPolicy:
-      Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
-      Properties:
-        PolicyName: ProfilesWriteScalingPolicy
-        PolicyType: TargetTrackingScaling
-        ScalingTargetId:
-          Ref: ProfilesWriteCapacityScalableTarget
-        TargetTrackingScalingPolicyConfiguration:
-          TargetValue: 50.0
-          ScaleInCooldown: 60
-          ScaleOutCooldown: 60
-          PredefinedMetricSpecification:
-            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+        BillingMode: PAY_PER_REQUEST
 
     ProfilesSearchHelpTable:
       Type: AWS::DynamoDB::Table
@@ -308,37 +278,7 @@ resources:
             KeyType: HASH
           - AttributeName: userId
             KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-
-    ProfilesSearchHelpWriteCapacityScalableTarget:
-      Type: "AWS::ApplicationAutoScaling::ScalableTarget"
-      Properties:
-        MaxCapacity: 15
-        MinCapacity: 1
-        ResourceId:
-          'Fn::Join':
-            - /
-            - - table
-              - Ref: ProfilesSearchHelpTable
-        RoleARN: ${self:custom.external_file.environment.scalingRoleArn}
-        ScalableDimension: dynamodb:table:WriteCapacityUnits
-        ServiceNamespace: dynamodb
-
-    ProfilesSearchHelpWriteScalingPolicy:
-      Type: "AWS::ApplicationAutoScaling::ScalingPolicy"
-      Properties:
-        PolicyName: ProfilesSearchHelpWriteScalingPolicy
-        PolicyType: TargetTrackingScaling
-        ScalingTargetId:
-          Ref: ProfilesSearchHelpWriteCapacityScalableTarget
-        TargetTrackingScalingPolicyConfiguration:
-          TargetValue: 50.0
-          ScaleInCooldown: 60
-          ScaleOutCooldown: 60
-          PredefinedMetricSpecification:
-            PredefinedMetricType: DynamoDBWriteCapacityUtilization
+        BillingMode: PAY_PER_REQUEST
 
     ProfilesPostsTable:
       Type: AWS::DynamoDB::Table
@@ -358,9 +298,7 @@ resources:
             KeyType: HASH
           - AttributeName: name
             KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
 
     ScaledownPermission:
       Type: "AWS::Lambda::Permission"
