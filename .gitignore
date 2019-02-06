@@ -17,6 +17,7 @@ tmp
 # debug
 test.sh
 dynamodb_local
+.dynamodb
 
 .serverless/
 
