@@ -24,9 +24,8 @@ provider:
   region: ap-northeast-1
   environment:
     TABLE_PREFIX: '${self:provider.stage}-'
-    DB_ENDPOINT: ${self:custom.external_file.environment.dynamodb.endpoint, ''}
+    DB_ENDPOINT: 'http://localhost:${self:custom.dynamodb.start.port}'
     REGION: ${self:provider.region}
-    DB_PORT: ${self:custom.external_file.environment.dynamodb.port, ''}
   memorySize: 128
   timeout: 15
   iamRoleStatements:
@@ -49,11 +48,9 @@ provider:
           - table/*
 
 custom:
-  external_file:
-    environment: ${file(./config.${self:provider.stage}.json)}
   dynamodb:
     start:
-      port: ${self:custom.external_file.environment.dynamodb.port, "8000"}
+      port: 8000
       inMemory: true
       migrate: true
       seed: true
@@ -79,8 +76,11 @@ functions:
   authorizer:
     handler: functions/authorizer/index.handler
     name: ${self:service}-${self:provider.stage}-authorizer
-    # environment:
-    #   sourceIp: ${self:custom.external_file.environment.sourceIp}
+    environment:
+      # for authorizer/index.js
+      PUBLIC_KEY: ${file(./keys/pubkey.pem)}
+      # for authorizer/genGuestToken.js
+      PRIVATE_KEY: ''
   profilesQuery:
     handler: functions/profiles/query.handler
     name: ${self:service}-${self:provider.stage}-profilesQuery
@@ -298,6 +298,5 @@ resources:
         BillingMode: PAY_PER_REQUEST
 
 plugins:
-  - serverless-plugin-stage-variables
   - serverless-dynamodb-local
   - serverless-offline

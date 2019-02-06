@@ -1,7 +1,7 @@
 var jwt = require('jsonwebtoken');
 var fs = require('fs');
 var publicKey = process.env.PUBLIC_KEY || fs.readFileSync(__dirname + '/pubkey.pem', 'utf8');
-var sourceIp = require('./sourceIp.js');
+var sourceIp = require('../../config.json').sourceIp;
 
 function getSelf(token) {
   if (!token) {

@@ -1,8 +1,3 @@
 {
-  "accountId": "",
-  "region": "",
-  "s3Bucket": "",
-  "stackName": "",
-  "accessControlAllowOrigin": "",
-  "lambdaAlias": ""
+  "sourceIp": ""
 }

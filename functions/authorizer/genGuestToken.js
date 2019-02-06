@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
-const privateKey = fs.readFileSync(__dirname + '/private.pem', 'utf8');
+const privateKey = process.env.PRIVATE_KEY || fs.readFileSync(__dirname + '/private.pem', 'utf8');
 const index = require('./index.js');
 const guest = require('./guest.js');
 

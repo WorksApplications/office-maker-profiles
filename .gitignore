@@ -21,3 +21,6 @@ dynamodb_local
 .serverless/
 
 config.*.json
+config.json
+
+keys/
