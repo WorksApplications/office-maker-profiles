@@ -3,11 +3,12 @@
 
 var fs = require('fs');
 var AWS = require('aws-sdk');
-var dynamoUtil = require('../functions/common/dynamo-util.js');
+var dynamoUtil = require('../../functions/common/dynamo-util.js');
 var dynamodb = new AWS.DynamoDB();
-var project = JSON.parse(fs.readFileSync('./project.json', 'utf8'));
+// var project = JSON.parse(fs.readFileSync('./project.json', 'utf8'));
 var documentClient = new AWS.DynamoDB.DocumentClient({
-  region: project.region
+  region: 'localhost',
+  endpoint: 'http://localhost:8010'
 });
 
 var profiles = fs.readFileSync(__dirname + '/mock.csv', 'utf8').replace(/\r/g, '').split('\n').map((line, index) => {
@@ -17,35 +18,36 @@ var profiles = fs.readFileSync(__dirname + '/mock.csv', 'utf8').replace(/\r/g, '
     return null;
   }
   return {
-    userId: zeroPadding(index, 4) + '@example.com',
-    employeeId: zeroPadding(index, 4),
+    userId: encodeURIComponent(zeroPadding(index, 4) + '@example.com'),
+    employeeId: encodeURIComponent(zeroPadding(index, 4)),
     picture: null,
-    name: name,
-    ruby: ruby,
-    organization: 'Example Co., Ltd.',
-    post: 'Example ' + Math.floor(index / 1000),
+    name: encodeURIComponent(name),
+    ruby: encodeURIComponent(ruby),
+    organization: encodeURIComponent('Example Co., Ltd.'),
+    post: encodeURIComponent('Example ' + Math.floor(index / 1000)),
     rank: index % 10 === 0 ? 'Manager' : 'Assistant',
-    cellPhone: '080-XXX-' + zeroPadding(index, 4),
+    cellPhone: encodeURIComponent('080-XXX-' + zeroPadding(index, 4)),
     extensionPhone: 'XXXXX',
-    mail: zeroPadding(index, 4) + '@example.com',
+    mail: encodeURIComponent(zeroPadding(index, 4) + '@example.com'),
     workplace: null
   }
 }).filter(profile => !!profile);
 
 console.log('generating mock data...');
-// profiles.reduce((promise, profile) => {
-//   return promise.then(_ => putProfile(profile));
-// }, Promise.resolve()).then(_ => {
-//   console.log('done');
-//   process.exit(0);
-// }).catch(e => {
-//   console.error(e);
-//   process.exit(1);
-// });
+profiles.reduce((promise, profile) => {
+   return promise.then(_ => putProfile(profile));
+ }, Promise.resolve()).then(_ => {
+   console.log('done');
+   process.exit(0);
+ }).catch(e => {
+   console.error(e);
+   process.exit(1);
+ });
 
 function putProfile(profile) {
+  console.log(profile);
   return dynamoUtil.put(documentClient, {
-    TableName: "profiles",
+    TableName: "dev_profiles",
     Item: profile
   });
 }

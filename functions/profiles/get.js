@@ -3,7 +3,8 @@ var lambdaUtil = require('../common/lambda-util.js');
 
 exports.handler = (event, context, callback) => {
   console.log('event:', JSON.stringify(event, null, 2));
-  var userId = event.pathParameters.userId;
+  var userId =　event.pathParameters.userId;
+  console.log('userId: ',userId);
   db.getProfile(userId).then(profile => {
     if (profile) {
       lambdaUtil.send(callback, 200, profile);

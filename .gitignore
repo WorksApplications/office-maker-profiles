@@ -1,5 +1,5 @@
 # secret
-config.*json
+functions/**/config.json
 mockAuth.js
 *.pem
 functions/authorizer/sourceIp.js
@@ -7,7 +7,7 @@ functions/authorizer/guest.js
 functions/authorizer/sustain.js
 
 # node
-node_modules
+node_modules/
 
 
 # work
@@ -17,3 +17,7 @@ tmp
 # debug
 test.sh
 dynamodb_local
+
+.serverless/
+
+config.*.json

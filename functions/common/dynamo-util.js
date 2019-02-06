@@ -1,8 +1,10 @@
 function exec(method) {
   return function(dynamoDbOrDocumentClient, params) {
     return new Promise((resolve, reject) => {
+      //console.log(dynamoDbOrDocumentClient);
       dynamoDbOrDocumentClient[method](params, function(e, data) {
         if (e) {
+          console.log(e);
           reject(e);
         } else {
           resolve(data);

@@ -1,15 +1,13 @@
-const fs = require('fs');
-const configJsonFile = __dirname + '/config.json';
-const config = JSON.parse(fs.readFileSync(configJsonFile, 'utf8'));
 
-const options = process.env.EXEC_MODE === 'test' ? {
-  region: 'ap-northeast-1',
-  endpoint: 'http://localhost:4569'
-} : {
-  region: 'ap-northeast-1'
+const options = {
+  
+  //region: 'ap-northeast-1',
+  //endpoint: 'http://localhost:4569'
+  region: process.env.REGION,
+  endpoint: process.env.DB_ENDPOINT === ''? undefined: process.env.DB_ENDPOINT,
 };
-
-const prefix = config.tablePrefix;
+console.log('opt');
+const prefix = process.env.TABLE_PREFIX;
 
 const tableNames = {
   profiles: prefix + 'profiles',
@@ -17,7 +15,6 @@ const tableNames = {
   profilesSearchHelp: prefix + 'profilesSearchHelp'
 };
 
-console.log(tableNames);
 
 module.exports = {
   options: options,
