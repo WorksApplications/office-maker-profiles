@@ -26,7 +26,7 @@ describe('Profile Lambda', () => {
       post: 'Tech',
       rank: 'Manager',
       cellPhone: '080-XXX-4567',
-      extensionPhone: 'XXXXX',
+      extensionPhone: '12345',
       mail: 'yamada_t@example.com',
       workplace: null
     }).then(_ => db.putProfileAndMakeIndex({
@@ -39,7 +39,7 @@ describe('Profile Lambda', () => {
       post: 'Sales and Tech',
       rank: 'Assistant',
       cellPhone: '080-XXX-5678',
-      extensionPhone: 'XXXXX',
+      extensionPhone: '98765',
       mail: 'yamada_s@example.com',
       workplace: null // be sure to allow empty string
     }));
@@ -159,6 +159,34 @@ describe('Profile Lambda', () => {
       return handlerToPromise(profilesQuery.handler)({
         "queryStringParameters": {
           "q": "\"Sales and Tech\""
+        }
+      }, {}).then(assertProfileLength(1));
+    });
+    it('should search profiles by q (match to cellPhone)', () => {
+      return handlerToPromise(profilesQuery.handler)({
+        "queryStringParameters": {
+          "q": "080-XXX-4567"
+        }
+      }, {}).then(assertProfileLength(1));
+    });
+    it('should search profiles by q (match to cellPhone)', async () => {
+      return handlerToPromise(profilesQuery.handler)({
+        "queryStringParameters": {
+          "q": "080-XXX-5678"
+        }
+      }, {}).then(assertProfileLength(1));
+    });
+    it('should search profiles by q (match to extension number)', () => {
+      return handlerToPromise(profilesQuery.handler)({
+        "queryStringParameters": {
+          "q": "12345"
+        }
+      }, {}).then(assertProfileLength(1));
+    });
+    it('should search profiles by q (match to extension number)', () => {
+      return handlerToPromise(profilesQuery.handler)({
+        "queryStringParameters": {
+          "q": "98765"
         }
       }, {}).then(assertProfileLength(1));
     });

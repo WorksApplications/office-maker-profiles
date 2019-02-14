@@ -35,6 +35,7 @@ function makeKeys(profile) {
   const normalizedPost = searchHelper.normalize(profile.post) || null;
   const normalizedOrganization = searchHelper.normalize(profile.organization) || null;
   const extensionPhone = profile.extensionPhone || null;
+  const cellPhone = searchHelper.normalize(profile.cellPhone || '') || null;
 
   const keys = {};
   [normalizedName1,
@@ -46,7 +47,8 @@ function makeKeys(profile) {
     normalizedMailBeforeAt,
     normalizedMailBeforeUnderscore,
     normalizedPost,
-    extensionPhone
+    extensionPhone,
+    cellPhone,
   ].filter(key => {
     return !!key;
   }).forEach(key => {
@@ -194,6 +196,7 @@ function findProfileByQuery(q, limit, exclusiveStartKey) {
   log('Queries:', qs);
   const searches = qs.map(q => {
     const normalizedQ = searchHelper.normalize(q);
+    log('NormalizedQueries:', normalizedQ);
     return dynamoUtil.query(documentClient, {
       TableName: options.tableNames.profilesSearchHelp,
       KeyConditionExpression: '#key = :key',
