@@ -3,42 +3,16 @@ process.env.TABLE_PREFIX = 'test-';
 process.env.IS_OFFLINE = 'true';
 process.env.DB_ENDPOINT = 'http://localhost:8000';
 
-const childProcess = require('child_process');
-const fs = require('fs');
 const AWS = require('aws-sdk');
 const db = require('../functions/common/db.js');
 const dynamoUtil = require('../functions/common/dynamo-util.js');
 const options = require('../functions/common/db-config.js');
-const dynamodb = new AWS.DynamoDB(options.options);
 const documentClient = new AWS.DynamoDB.DocumentClient(options.options);
-const yaml = require('js-yaml');
-const assert = require('assert');
 
 const profilesGet = require('../functions/profiles/get.js');
 const profilesPut = require('../functions/profiles/put.js');
 const profilesDelete = require('../functions/profiles/delete.js');
 const profilesQuery = require('../functions/profiles/query.js');
-const postsQuery = require('../functions/posts/query.js');
-
-const templateYmlPath = __dirname + '/../functions/template.yml';
-const dynamodbLocalPath = __dirname + '/../dynamodb_local';
-const port = 4569;
-
-function getTableProperties(templateYmlPath) {
-  var templateYml = yaml.safeLoad(fs.readFileSync(templateYmlPath, 'utf8'));
-  var resources = templateYml.Resources;
-  return filterTableProperties(resources);
-}
-
-function filterTableProperties(resources) {
-  return Object.keys(resources).map(function(key) {
-    const resource = resources[key];
-    if (resource.Type === 'AWS::DynamoDB::Table') {
-      return resource.Properties;
-    }
-    return null;
-  }).filter(p => !!p);
-}
 
 describe('Profile Lambda', () => {
   beforeEach(() => {
@@ -319,12 +293,6 @@ function assertStatus(expect) {
   };
 }
 
-function reducePromises(promises) {
-  return promises.reduce((prev, toPromise) => {
-    return prev.then(toPromise);
-  }, Promise.resolve());
-}
-
 function handlerToPromise(handler) {
   return function(event, context) {
     return new Promise((resolve, reject) => {
@@ -337,54 +305,4 @@ function handlerToPromise(handler) {
       });
     });
   };
-}
-
-function duringRunningLocalDynamo(dynamodbLocalPath, port, promise) {
-  return runLocalDynamo(dynamodbLocalPath, port).then(p => {
-    return new Promise((resolve, reject) => {
-      var err = undefined;
-      var result = undefined;
-      p.on('close', code => {
-        if (err) {
-          reject(err);
-        } else if (code) {
-          reject('child process exited with code: ' + code);
-        } else {
-          resolve(result);
-        }
-      });
-      delay(200).then(_ => {
-        return promise.then(result_ => {
-          result = result_;
-          p.kill();
-        }).catch(e => {
-          err = e;
-          p.kill();
-        });
-      });
-    });
-  });
-}
-
-function delay(time) {
-  return new Promise((resolve, reject) => {
-    setTimeout(resolve, time);
-  });
-}
-
-function runLocalDynamo(dynamodbLocalPath, port) {
-  return new Promise((resolve, reject) => {
-    var p = childProcess.spawn('java', [
-      `-Djava.library.path=.;./DynamoDBLocal_lib`,
-      '-jar',
-      'DynamoDBLocal.jar',
-      '-inMemory',
-      '-port',
-      '' + port
-    ], {
-      // stdio: 'inherit',
-      cwd: dynamodbLocalPath
-    });
-    resolve(p);
-  });
 }
