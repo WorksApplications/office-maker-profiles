@@ -4,7 +4,7 @@
   "description": "Serverless implementation for Office Maker Profile Service",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/lambda-test.js"
+    "test": "bash test/startOffline.sh && mocha test/lambda-test.js; bash test/stopOffline.sh"
   },
   "author": "",
   "license": "Apache 2.0",

@@ -1,4 +1,7 @@
-process.env.EXEC_MODE = 'test';
+process.env.REGION = 'ap-northeast-1';
+process.env.TABLE_PREFIX = 'test-';
+process.env.IS_OFFLINE = 'true';
+process.env.DB_ENDPOINT = 'http://localhost:8000';
 
 const childProcess = require('child_process');
 const fs = require('fs');
@@ -38,25 +41,6 @@ function filterTableProperties(resources) {
 }
 
 describe('Profile Lambda', () => {
-  let dbProcess = null;
-
-  before(function() {
-    this.timeout(5000);
-    return runLocalDynamo(dynamodbLocalPath, port).then(p => {
-      dbProcess = p;
-      return delay(700).then(_ => {
-        var tableProperties = getTableProperties(templateYmlPath);
-        var promises = tableProperties.map(tableProperty => {
-          return dynamoUtil.createTable(dynamodb, tableProperty);
-        });
-        return Promise.all(promises);
-      });
-    });
-  });
-  after(function() {
-    dbProcess.kill();
-  });
-
   beforeEach(() => {
     return db.putProfileAndMakeIndex({
       userId: 'yamada_t@example.com',
