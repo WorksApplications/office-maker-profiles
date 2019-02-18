@@ -153,7 +153,7 @@ describe('Profile Lambda', () => {
         "queryStringParameters": {
           "q": "Tech"
         }
-      }, {}).then(assertProfileLength(1));
+      }, {}).then(assertProfileLength(2));
     });
     it('should search profiles by q (match to quoted post)', () => {
       return handlerToPromise(profilesQuery.handler)({
@@ -269,6 +269,49 @@ describe('Profile Lambda', () => {
           "userId": "not_exist@example.com"
         }
       }, {}).then(assertStatus(200));
+    });
+  });
+});
+
+describe('Profile Lambda with other data', () => {
+  beforeEach(() => {
+    return db.putProfileAndMakeIndex({
+      userId: "profile-foo@example.com",
+      picture: null,
+      name: null,
+      ruby: null,
+      employeeId: null,
+      organization: null,
+      post: 'Foo Group Research & Dev',
+      rank: null,
+      cellPhone: null,
+      extensionPhone: null,
+      mail: null,
+      workplace: null
+    });
+  });
+
+  describe('GET /profiles', () => {
+    it('should search profiles by post', () => {
+      return handlerToPromise(profilesQuery.handler)({
+        "queryStringParameters": {
+          "q": "Research"
+        }
+      }, {}).then(assertProfileLength(1));
+    });
+    it('should search profiles by post', () => {
+      return handlerToPromise(profilesQuery.handler)({
+        "queryStringParameters": {
+          "q": "Dev"
+        }
+      }, {}).then(assertProfileLength(1));
+    });
+    it('should search profiles by post', () => {
+      return handlerToPromise(profilesQuery.handler)({
+        "queryStringParameters": {
+          "q": "Research Dev"
+        }
+      }, {}).then(assertProfileLength(1));
     });
   });
 });

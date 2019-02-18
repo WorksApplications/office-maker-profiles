@@ -33,12 +33,13 @@ function makeKeys(profile) {
   const normalizedMailBeforeUnderscore = searchHelper.normalize((profile.mail || '').split('_')[0]) || null;
   const normalizedMailBeforeDot = searchHelper.normalize((profile.mail || '').split('.')[0]) || null;
   const normalizedPost = searchHelper.normalize(profile.post) || null;
+  const normalizedPostArray = (profile.post || '').split(' ').map(searchHelper.normalize) || null;
   const normalizedOrganization = searchHelper.normalize(profile.organization) || null;
   const extensionPhone = profile.extensionPhone || null;
   const cellPhone = searchHelper.normalize(profile.cellPhone || '') || null;
 
   const keys = {};
-  [normalizedName1,
+  ([normalizedName1,
     normalizedName2,
     normalizedRuby1,
     normalizedRuby2,
@@ -49,7 +50,7 @@ function makeKeys(profile) {
     normalizedPost,
     extensionPhone,
     cellPhone,
-  ].filter(key => {
+  ].concat(normalizedPostArray)).filter(key => {
     return !!key;
   }).forEach(key => {
     keys[key] = true;
