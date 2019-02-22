@@ -17,6 +17,8 @@ function getProfile(userId) {
 }
 
 function makeKeys(profile) {
+  const flatten = (arr) => [].concat.apply([], arr);
+
   const normalizedName = searchHelper.normalize(profile.name);
   const normalizedNameArray = normalizedName.split(' ');
   const normalizedName1 = normalizedNameArray[0] || null;
@@ -33,7 +35,7 @@ function makeKeys(profile) {
   const normalizedMailBeforeUnderscore = searchHelper.normalize((profile.mail || '').split('_')[0]) || null;
   const normalizedMailBeforeDot = searchHelper.normalize((profile.mail || '').split('.')[0]) || null;
   const normalizedPost = searchHelper.normalize(profile.post) || null;
-  const normalizedPostArray = (profile.post || '').split(' ').map(searchHelper.normalize) || null;
+  const normalizedPostArray = flatten((profile.post || '').split(' ').map(x => x.split('\n'))).map(searchHelper.normalize) || null;
   const normalizedOrganization = searchHelper.normalize(profile.organization) || null;
   const extensionPhone = profile.extensionPhone || null;
   const cellPhone = searchHelper.normalize(profile.cellPhone || '') || null;
