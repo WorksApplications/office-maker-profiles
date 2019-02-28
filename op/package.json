@@ -1,0 +1,9 @@
+{
+  "name": "op",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "copy-dynamodb-table": "^2.0.14"
+  }
+}
