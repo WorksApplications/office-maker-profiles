@@ -1,16 +1,24 @@
+const stage = 'prod';
+const region = 'ap-northeast-1';
+
+process.env.TABLE_PREFIX = stage;
+process.env.REGION = region;
+
+const tableName = `${stage}-profiles`;
+
 var AWS = require('aws-sdk');
 AWS.config.update({
-  region: "ap-northeast-1"
+  region: region,
 });
 var db = require('../functions/common/db.js');
 const documentClient = new AWS.DynamoDB.DocumentClient({
-  region: 'ap-northeast-1'
+  region: region,
 });
 const dynamoUtil = require('../functions/common/dynamo-util.js');
 
 function scanPosts() {
   return dynamoUtil.scan(documentClient, {
-    TableName: "profiles",
+    TableName: tableName,
     ProjectionExpression: "post"
   }).then(data => {
     return data.Items;
