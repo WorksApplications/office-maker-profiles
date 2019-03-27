@@ -1,0 +1,27 @@
+version: 0.2
+
+env:
+  variables:
+    stage: "prod"
+  parameter-store:
+    config_json: "office-maker-profiles-config-prod"
+
+    # public key for JWT should be same as office-maker-api's pubkey
+    pubkey: "office-maker-api-authorizer-pubkey"
+
+phases:
+  install:
+    commands:
+      - echo ${config_json} >> config.prod.json
+      - echo "${pubkey}" >> keys/pubkey.pem
+      - npm install
+      - cd functions && npm install && cd -
+  build:
+    commands:
+      - npm run test
+  post_build:
+    commands: |
+      if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
+        ./node_modules/.bin/sls deploy -s ${stage}
+      fi;
+
