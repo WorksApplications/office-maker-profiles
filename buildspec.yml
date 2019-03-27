@@ -13,6 +13,7 @@ phases:
   install:
     commands:
       - echo ${config_json} >> config.prod.json
+      - mkdir -p keys
       - echo "${pubkey}" >> keys/pubkey.pem
       - npm install
       - cd functions && npm install && cd -
