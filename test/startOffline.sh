@@ -10,7 +10,9 @@ serverless offline start -s test &> $TMPFILE &
 PID=$!
 echo $PID > .offline.pid
 
-while ! grep "Offline listening" $TMPFILE
-do sleep 1; done
+# CodeBuild cannot catch this grep?
+sleep 10
+#while ! grep "Offline listening" $TMPFILE
+#do sleep 1; done
 
 rm $TMPFILE
