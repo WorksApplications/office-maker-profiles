@@ -11,8 +11,7 @@ PID=$!
 echo $PID > .offline.pid
 
 # CodeBuild cannot catch this grep?
-sleep 10
-#while ! grep "Offline listening" $TMPFILE
-#do sleep 1; done
+while ! grep "Offline listening" $TMPFILE
+do sleep 1; done
 
 rm $TMPFILE

@@ -1,7 +1,7 @@
 process.env.REGION = 'ap-northeast-1';
 process.env.TABLE_PREFIX = 'test-';
 process.env.IS_OFFLINE = 'true';
-process.env.DB_ENDPOINT = 'http://localhost:8000';
+process.env.DB_ENDPOINT = `http://${process.env.LOCALHOST || 'localhost'}:8000`;
 
 const AWS = require('aws-sdk');
 const db = require('../functions/common/db.js');

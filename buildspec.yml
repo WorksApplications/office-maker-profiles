@@ -12,19 +12,27 @@ env:
 phases:
   install:
     commands:
+      - sudo apt-get update && sudo apt-get install -y lsof
       - echo ${config_json} >> config.prod.json
       - mkdir -p keys
       - echo "${pubkey}" >> keys/pubkey.pem
       - npm install
       - cd functions && npm install && cd -
-      - npx sls dynamodb install --localPath .dynamodb
-      - sudo apt-get update && sudo apt-get install -y openjdk-7-jre lsof
+      - wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /usr/bin/jq && chmod +x /usr/bin/jq
+      - pip install yq
+      - pip install --upgrade awscli
+      - docker pull amazon/dynamodb-local
   pre_build:
     commands:
-      - npm run test
+      - docker run -d -p 8000:8000 amazon/dynamodb-local
+      - echo $(npx sls print -s test | yq '.resources.Resources.ProfilesTable.Properties') > input.json && aws dynamodb create-table --cli-input-json file://input.json --endpoint-url "http://localhost:8000"
+      - echo $(npx sls print -s test | yq '.resources.Resources.ProfilesSearchHelpTable.Properties') > input.json && aws dynamodb create-table --cli-input-json file://input.json --endpoint-url "http://localhost:8000"
+      - echo $(npx sls print -s test | yq '.resources.Resources.ProfilesPostsTable.Properties') > input.json && aws dynamodb create-table --cli-input-json file://input.json --endpoint-url "http://localhost:8000"
+      - aws --endpoint-url http://localhost:8000 dynamodb list-tables
+      - npx mocha test/lambda-test.js
+
   build:
     commands: |
       if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
         npx sls deploy -s ${stage}
       fi;
-
