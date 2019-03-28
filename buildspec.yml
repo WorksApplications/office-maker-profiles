@@ -17,12 +17,14 @@ phases:
       - echo "${pubkey}" >> keys/pubkey.pem
       - npm install
       - cd functions && npm install && cd -
-  build:
+      - npx sls dynamodb install --localPath .dynamodb
+      - sudo apt-get update && sudo apt-get install -y openjdk-7-jre lsof
+  pre_build:
     commands:
       - npm run test
-  post_build:
+  build:
     commands: |
       if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
-        ./node_modules/.bin/sls deploy -s ${stage}
+        npx sls deploy -s ${stage}
       fi;
 
