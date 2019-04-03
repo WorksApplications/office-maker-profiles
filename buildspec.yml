@@ -13,15 +13,16 @@ phases:
   install:
     commands:
       - sudo apt-get update && sudo apt-get install -y lsof
-      - echo ${config_json} >> config.prod.json
-      - mkdir -p keys
-      - echo "${pubkey}" >> keys/pubkey.pem
-      - npm install
-      - cd functions && npm install && cd -
+      - npm i -g npm@latest
+      - npm ci
+      - cd functions && npm ci && cd -
       - wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -O /usr/bin/jq && chmod +x /usr/bin/jq
       - pip install yq
       - pip install --upgrade awscli
       - docker pull amazon/dynamodb-local
+      - echo ${config_json} >> config.prod.json
+      - mkdir -p keys
+      - echo "${pubkey}" >> keys/pubkey.pem
   pre_build:
     commands:
       - docker run -d -p 8000:8000 amazon/dynamodb-local
@@ -36,3 +37,7 @@ phases:
       if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
         npx sls deploy -s ${stage}
       fi;
+
+cache:
+  paths:
+    - '~/.npm/**/*'
