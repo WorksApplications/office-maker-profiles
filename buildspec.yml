@@ -20,7 +20,7 @@ phases:
       - pip install yq
       - pip install --upgrade awscli
       - docker pull amazon/dynamodb-local
-      - echo ${config_json} >> config.prod.json
+      - echo ${config_json} >> config.json
       - mkdir -p keys
       - echo "${pubkey}" >> keys/pubkey.pem
   pre_build:
