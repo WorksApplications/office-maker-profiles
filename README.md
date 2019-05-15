@@ -1,6 +1,8 @@
 Profile Service
 ====
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/WorksApplications/office-maker-profiles.svg)](https://greenkeeper.io/)
+
 Serverless implementation for Office Maker Profile Service.
 
 ## Development Requirement
