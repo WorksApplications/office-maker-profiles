@@ -2,9 +2,9 @@ version: 0.2
 
 env:
   variables:
-    stage: "prod"
+    stage: "stg"
   parameter-store:
-    config_json: "office-maker-profiles-config-prod"
+    config_json: "office-maker-profiles-config-stg"
 
     # public key for JWT should be same as office-maker-api's pubkey
     pubkey: "office-maker-api-authorizer-pubkey"
