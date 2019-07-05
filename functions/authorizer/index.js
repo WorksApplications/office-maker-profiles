@@ -29,7 +29,7 @@ exports.handler = (event, context, callback) => {
     console.log(e);
     return null;
   }).then(user => {
-    if (user && user.role.toLowerCase() === 'admin') {
+    if (user && user.role.toLowerCase() === 'system') {
       callback(null, {
         principalId: user.userId,
         policyDocument: {
@@ -38,6 +38,20 @@ exports.handler = (event, context, callback) => {
             Action: 'execute-api:Invoke',
             Effect: 'Allow',
             Resource: event.methodArn
+          }]
+        },
+        context: user
+      });
+    } else if (user && user.role.toLowerCase() === 'admin') {
+      callback(null, {
+        principalId: user.userId,
+        policyDocument: {
+          Version: '2012-10-17',
+          Statement: [{
+            Action: 'execute-api:Invoke',
+            Effect: 'Allow',
+            Resource: event.methodArn
+            // Condition.IpAddress
           }]
         },
         context: user
