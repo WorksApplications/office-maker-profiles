@@ -50,25 +50,12 @@ exports.handler = (event, context, callback) => {
           Statement: [{
             Action: 'execute-api:Invoke',
             Effect: 'Allow',
-            Resource: event.methodArn
-            // Condition.IpAddress
-          }]
-        },
-        context: user
-      });
-    } else if (user && (user.role.toLowerCase() === 'general' || user.role.toLowerCase() === 'guest')) {
-      callback(null, {
-        principalId: user.userId,
-        policyDocument: {
-          Version: '2012-10-17',
-          Statement: [{
-            Action: 'execute-api:Invoke',
-            Effect: 'Allow',
-            Resource: event.methodArn
-              .replace('/POST/', '/GET/')
-              .replace('/PUT/', '/GET/')
-              .replace('/PATCH/', '/GET/')
-              .replace('/DELETE/', '/GET/')
+            Resource: event.methodArn,
+            Condition: {
+              IpAddress: {
+                "aws:SourceIp": sourceIp
+              }
+            },
           }]
         },
         context: user
