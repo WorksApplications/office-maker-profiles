@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.489.0",
+    "aws-sdk": "^2.547.0",
     "copy-dynamodb-table": "^2.0.14"
   }
 }
