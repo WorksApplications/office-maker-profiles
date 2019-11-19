@@ -10,7 +10,7 @@
   "license": "Apache 2.0",
   "devDependencies": {
     "archiver": "^3.0.0",
-    "aws-sdk": "^2.490.0",
+    "aws-sdk": "^2.574.0",
     "find": "^0.3.0",
     "js-yaml": "^3.13.1",
     "mocha": "^6.1.4",
